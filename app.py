@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
-import pandas as pd
 import os
 from datetime import datetime
 import tempfile
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 import werkzeug
+import csv
 
 # Importar psycopg2 para PostgreSQL o sqlite3 como fallback
 try:
@@ -126,8 +126,8 @@ def load_inventory_from_csv():
 def sincronizar_inventario_web():
     """Sincronizar inventario desde la aplicación web"""
     try:
-        # Importar y ejecutar el script de sincronización
-        from sincronizar_inventario import sincronizar_inventario
+        # Importar y ejecutar el script de sincronización simplificado
+        from sincronizar_inventario_simple import sincronizar_inventario
         success, result = sincronizar_inventario()
         return success, result
         
@@ -138,8 +138,8 @@ def sincronizar_inventario_web():
 def procesar_excel_web(archivo):
     """Procesar archivo Excel desde la aplicación web"""
     try:
-        # Importar y ejecutar el script de procesamiento de Excel
-        from procesar_excel_original import procesar_excel_original, backup_antes_de_procesar
+        # Importar y ejecutar el script de procesamiento de Excel simplificado
+        from procesar_excel_simple import procesar_excel_original, backup_antes_de_procesar
         
         # Crear backup antes de procesar
         if not backup_antes_de_procesar():
@@ -756,7 +756,7 @@ def sincronizar_inventario_route():
     """Ruta para sincronizar inventario desde la web"""
     try:
         # Crear backup antes de sincronizar
-        from sincronizar_inventario import backup_registros
+        from sincronizar_inventario_simple import backup_registros
         if not backup_registros():
             return jsonify({'success': False, 'message': 'Error al crear backup'})
         
@@ -779,12 +779,12 @@ def eliminar_productos_obsoletos_route():
     """Ruta para eliminar productos obsoletos desde la web"""
     try:
         # Crear backup antes de eliminar
-        from eliminar_productos_obsoletos import backup_antes_de_eliminar
+        from eliminar_productos_simple import backup_antes_de_eliminar
         if not backup_antes_de_eliminar():
             return jsonify({'success': False, 'message': 'Error al crear backup'})
         
         # Realizar eliminación
-        from eliminar_productos_obsoletos import eliminar_productos_obsoletos
+        from eliminar_productos_simple import eliminar_productos_obsoletos
         success, result = eliminar_productos_obsoletos()
         
         if success:
