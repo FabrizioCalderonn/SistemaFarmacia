@@ -13,8 +13,13 @@ try:
     import psycopg2.extras
     DATABASE_TYPE = 'postgresql'
 except ImportError:
-    import sqlite3
-    DATABASE_TYPE = 'sqlite'
+    try:
+        import psycopg2.binary as psycopg2
+        import psycopg2.extras
+        DATABASE_TYPE = 'postgresql'
+    except ImportError:
+        import sqlite3
+        DATABASE_TYPE = 'sqlite'
 
 app = Flask(__name__)
 
@@ -834,5 +839,5 @@ def cargar_excel_route():
         return jsonify({'success': False, 'message': f'Error: {str(e)}'})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8081))
+    port = int(os.environ.get('PORT', 10000))
     app.run(debug=False, host='0.0.0.0', port=port) 
