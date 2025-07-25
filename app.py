@@ -21,6 +21,23 @@ except ImportError:
         import sqlite3
         DATABASE_TYPE = 'sqlite'
 
+# Configuración de farmacias
+FARMACIAS = {
+    'farmacia1': {
+        'nombre': 'Farmacia Principal',
+        'direccion': 'Dirección 1',
+        'telefono': 'Teléfono 1'
+    },
+    'farmacia2': {
+        'nombre': 'Farmacia Sucursal',
+        'direccion': 'Dirección 2', 
+        'telefono': 'Teléfono 2'
+    }
+}
+
+# Farmacia por defecto
+FARMACIA_DEFAULT = 'farmacia1'
+
 app = Flask(__name__)
 
 # Configuración de la base de datos
@@ -64,7 +81,8 @@ def init_db():
                 lote TEXT,
                 medico TEXT,
                 junta_vigilancia TEXT,
-                numero_inscripcion_clinica TEXT
+                numero_inscripcion_clinica TEXT,
+                farmacia TEXT DEFAULT 'farmacia1'
             )
         ''')
     else:
@@ -84,7 +102,8 @@ def init_db():
                 lote TEXT,
                 medico TEXT,
                 junta_vigilancia TEXT,
-                numero_inscripcion_clinica TEXT
+                numero_inscripcion_clinica TEXT,
+                farmacia TEXT DEFAULT 'farmacia1'
             )
         ''')
     
@@ -255,6 +274,17 @@ def get_estadisticas():
             'sin_stock': 0
         }
 
+def get_farmacia_actual():
+    """Obtener la farmacia actual desde la sesión o parámetros"""
+    farmacia = request.args.get('farmacia', FARMACIA_DEFAULT)
+    if farmacia not in FARMACIAS:
+        farmacia = FARMACIA_DEFAULT
+    return farmacia
+
+def get_farmacia_info(farmacia_id):
+    """Obtener información de una farmacia específica"""
+    return FARMACIAS.get(farmacia_id, FARMACIAS[FARMACIA_DEFAULT])
+
 # Inicializar base de datos (solo para registros, no inventario)
 init_db()
 
@@ -303,11 +333,13 @@ def guardar_registro():
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        farmacia_actual = get_farmacia_actual()
+        
         if DATABASE_TYPE == 'postgresql':
             cursor.execute('''
                 INSERT INTO registros (laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones, tipo_movimiento, 
-                                     fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                     fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, farmacia)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 data['laboratorio'],
                 data['medicamento'],
@@ -320,20 +352,16 @@ def guardar_registro():
                 data.get('lote', ''),
                 data.get('medico', ''),
                 data.get('junta_vigilancia', ''),
-                data.get('numero_inscripcion_clinica', '')
+                data.get('numero_inscripcion_clinica', ''),
+                farmacia_actual
             ))
             
-            # Actualizar stock del inventario
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock - %s 
-                WHERE laboratorio = %s AND medicamento = %s
-            ''', (data['cantidad'], data['laboratorio'], data['medicamento']))
+
         else:
             cursor.execute('''
                 INSERT INTO registros (laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones, tipo_movimiento, 
-                                 fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                 fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, farmacia)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 data['laboratorio'],
                 data['medicamento'],
@@ -346,15 +374,11 @@ def guardar_registro():
                 data.get('lote', ''),
                 data.get('medico', ''),
                 data.get('junta_vigilancia', ''),
-                data.get('numero_inscripcion_clinica', '')
+                data.get('numero_inscripcion_clinica', ''),
+                farmacia_actual
             ))
             
-            # Actualizar stock del inventario
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock - ? 
-                WHERE laboratorio = ? AND medicamento = ?
-            ''', (data['cantidad'], data['laboratorio'], data['medicamento']))
+
         
         conn.commit()
         conn.close()
@@ -860,12 +884,36 @@ def actualizar_inventario_csv():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'})
 
+@app.route('/cambiar_farmacia')
+def cambiar_farmacia():
+    """Página para cambiar de farmacia"""
+    farmacias = FARMACIAS
+    farmacia_actual = get_farmacia_actual()
+    return render_template('cambiar_farmacia.html', farmacias=farmacias, farmacia_actual=farmacia_actual)
+
+@app.route('/api/farmacias')
+def api_farmacias():
+    """API para obtener lista de farmacias"""
+    return jsonify(FARMACIAS)
+
+@app.route('/api/farmacia_actual')
+def api_farmacia_actual():
+    """API para obtener la farmacia actual"""
+    farmacia_actual = get_farmacia_actual()
+    return jsonify({
+        'farmacia': farmacia_actual,
+        'info': get_farmacia_info(farmacia_actual)
+    })
+
 # Inicializar la base de datos al arrancar la aplicación
 try:
     init_db()
     print("Base de datos inicializada correctamente")
 except Exception as e:
     print(f"Error al inicializar la base de datos: {e}")
+
+# Para Vercel
+app.debug = False
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
