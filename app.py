@@ -838,6 +838,13 @@ def cargar_excel_route():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'})
 
+# Inicializar la base de datos al arrancar la aplicación
+try:
+    init_db()
+    print("Base de datos inicializada correctamente")
+except Exception as e:
+    print(f"Error al inicializar la base de datos: {e}")
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(debug=False, host='0.0.0.0', port=port) 
