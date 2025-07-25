@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Compras</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            margin: 0;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            height: calc(100vh - 20px);
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin: 5px 0 0 0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .form-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-y: auto;
+        }
+
+        .search-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.85em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            grid-column: 1 / -1;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 8px 15px;
+            border: 2px solid #4facfe;
+            background: white;
+            color: #4facfe;
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .nav-btn:hover {
+            background: #4facfe;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 13px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4facfe;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .search-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+
+        .search-item:hover {
+            background: #f0f8ff;
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .product-details {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Registro de Compras</h1>
+            <p></p>
+        </div>
+
+        <!--<div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number">{{ estadisticas.total_productos }}</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ estadisticas.total_laboratorios }}</div>
+                <div class="stat-label">Laboratorios</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ estadisticas.stock_bajo }}</div>
+                <div class="stat-label">Stock Bajo</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ estadisticas.sin_stock }}</div>
+                <div class="stat-label">Sin Stock</div>
+            </div>
+        </div>-->
+
+        <div class="content-container">
+            <div class="form-container">
+                
+                <div id="alert" class="alert"></div>
+                
+                <form id="registroForm">
+                    <div class="form-group">
+                        <label for="laboratorio">Laboratorio</label>
+                        <select id="laboratorio" name="laboratorio" required>
+                            <option value="">Seleccione un laboratorio</option>
+                            {% for lab in laboratorios %}
+                            <option value="{{ lab }}">{{ lab }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medicamento">Medicamento</label>
+                        <select id="medicamento" name="medicamento" required disabled>
+                            <option value="">Primero seleccione un laboratorio</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" id="cantidad" name="cantidad" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha de Compra</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="date" id="fecha" name="fecha" required style="flex: 1;">
+                            <button type="button" onclick="establecerFechaActual()" style="padding: 6px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                                📅 Hoy
+                            </button>
+                        </div>
+                    </div>
+
+                                    <div class="form-row">
+                    <div class="form-group">
+                        <label for="fecha_vencimiento">Fecha de Vencimiento</label>
+                        <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lote">Lote</label>
+                        <input type="text" id="lote" name="lote" placeholder="Número de lote" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medico">Nombre del Médico</label>
+                        <input type="text" id="medico" name="medico" placeholder="Dr. Nombre Apellido" required>
+                    </div>
+                                    <div class="form-group">
+                    <label for="junta_vigilancia">Número de Junta de Vigilancia</label>
+                    <input type="text" id="junta_vigilancia" name="junta_vigilancia" placeholder="Número de junta" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="numero_inscripcion_clinica">Número de Inscripción de la Clínica</label>
+                    <input type="text" id="numero_inscripcion_clinica" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
+                </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+                </div>
+
+                                    <button type="submit" class="btn">
+                    💾 Guardar
+                </button>
+                </form>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Guardando registro...</p>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <h2 style="margin-bottom: 15px; color: #333; font-size: 1.2em;">🔍 Búsqueda</h2>
+                <div class="form-group">
+                    <label for="busqueda">Buscar Producto</label>
+                    <input type="text" id="busqueda" placeholder="Escriba el nombre del producto...">
+                </div>
+                
+                <div class="search-results" id="searchResults"></div>
+                
+
+            </div>
+            <div class="nav-buttons">
+                <a href="/historial" class="nav-btn">📋 Ver Historial</a>
+                <!--<a href="/inventario" class="nav-btn">📦 Ver Inventario</a>-->
+                <a href="/exportar_excel" class="nav-btn">📊 Exportar Excel</a>
+                <button type="button" onclick="mostrarCargadorExcel()" class="nav-btn" style="background: #17a2b8; color: white; border: 2px solid #17a2b8;">
+                    📁 Cargar Inventario Excel
+                </button>
+                
+                
+            </div>
+        </div>
+
+        
+    </div>
+
+    <script>
+        // Establecer fecha actual por defecto
+        function establecerFechaActual() {
+            const ahora = new Date();
+            const fecha = ahora.toISOString().split('T')[0];
+            document.getElementById('fecha').value = fecha;
+        }
+        
+        // Establecer fecha al cargar la página
+        establecerFechaActual();
+
+        // Cargar medicamentos cuando se selecciona laboratorio
+        document.getElementById('laboratorio').addEventListener('change', function() {
+            const laboratorio = this.value;
+            const medicamentoSelect = document.getElementById('medicamento');
+            
+            if (laboratorio) {
+                fetch(`/api/medicamentos/${encodeURIComponent(laboratorio)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        medicamentoSelect.innerHTML = '<option value="">Seleccione un medicamento</option>';
+                        
+                        data.forEach(med => {
+                            const option = document.createElement('option');
+                            option.value = med[0]; // medicamento
+                            option.textContent = `${med[0]} - ${med[1]}`; // medicamento - presentacion
+                            option.dataset.stock = med[3];
+                            medicamentoSelect.appendChild(option);
+                        });
+                        
+                        medicamentoSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('Error al cargar medicamentos', 'error');
+                    });
+            } else {
+                medicamentoSelect.innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
+                medicamentoSelect.disabled = true;
+            }
+        });
+
+
+
+        // Búsqueda de productos
+        let searchTimeout;
+        document.getElementById('busqueda').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const termino = this.value.trim();
+            
+            if (termino.length < 2) {
+                document.getElementById('searchResults').style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/buscar?q=${encodeURIComponent(termino)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultsContainer = document.getElementById('searchResults');
+                        resultsContainer.innerHTML = '';
+                        
+                        if (data.length === 0) {
+                            resultsContainer.innerHTML = '<div class="search-item">No se encontraron productos</div>';
+                        } else {
+                            data.forEach(producto => {
+                                const item = document.createElement('div');
+                                item.className = 'search-item';
+                                item.innerHTML = `
+                                    <div class="product-name">${producto[1]}</div>
+                                    <div class="product-details">
+                                        ${producto[0]} - ${producto[2]}
+                                    </div>
+                                `;
+                                item.addEventListener('click', () => {
+                                    // Llenar automáticamente el formulario
+                                    document.getElementById('laboratorio').value = producto[0];
+                                    document.getElementById('laboratorio').dispatchEvent(new Event('change'));
+                                    
+                                    setTimeout(() => {
+                                        document.getElementById('medicamento').value = producto[1];
+                                        document.getElementById('busqueda').value = '';
+                                        document.getElementById('searchResults').style.display = 'none';
+                                    }, 500);
+                                });
+                                resultsContainer.appendChild(item);
+                            });
+                        }
+                        
+                        resultsContainer.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error en búsqueda:', error);
+                    });
+            }, 300);
+        });
+
+        // Cerrar resultados de búsqueda al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+
+        // Manejar envío del formulario
+        document.getElementById('registroForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                laboratorio: document.getElementById('laboratorio').value,
+                medicamento: document.getElementById('medicamento').value,
+                cantidad: parseInt(document.getElementById('cantidad').value),
+                fecha: document.getElementById('fecha').value,
+                fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
+                lote: document.getElementById('lote').value,
+                medico: document.getElementById('medico').value,
+                junta_vigilancia: document.getElementById('junta_vigilancia').value,
+            numero_inscripcion_clinica: document.getElementById('numero_inscripcion_clinica').value,
+                observaciones: document.getElementById('observaciones').value,
+                tipo_movimiento: 'VENTA'
+            };
+
+            // Validaciones
+            if (!formData.laboratorio || !formData.medicamento) {
+                showAlert('Por favor complete todos los campos obligatorios', 'error');
+                return;
+            }
+
+            if (formData.cantidad <= 0) {
+                showAlert('La cantidad debe ser mayor a 0', 'error');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.btn').disabled = true;
+
+            // Enviar datos
+            fetch('/guardar_registro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.btn').disabled = false;
+
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    document.getElementById('registroForm').reset();
+                    establecerFechaActual(); // Establecer fecha actual después de reset
+                    document.getElementById('medicamento').disabled = true;
+                    document.getElementById('medicamento').innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.btn').disabled = false;
+                showAlert('Error al guardar el registro', 'error');
+                console.error('Error:', error);
+            });
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        function sincronizarInventario() {
+            if (!confirm('¿Estás seguro de que quieres sincronizar el inventario? Esto agregará productos nuevos sin afectar los registros existentes.')) {
+                return;
+            }
+
+            // Mostrar loading
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '🔄 Sincronizando...';
+            btn.disabled = true;
+
+            fetch('/sincronizar_inventario', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                if (data.success) {
+                    // Mostrar estadísticas detalladas
+                    mostrarEstadisticasSincronizacion(data.estadisticas);
+                    showAlert(data.message, 'success');
+                    // Recargar la página para mostrar los nuevos productos
+                    //recargar hasta cerrar el modal
+                    setTimeout(() => {
+                        location.reload();
+                    }, 10000);
+                    
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                showAlert('Error al sincronizar inventario', 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        function mostrarEstadisticasSincronizacion(estadisticas) {
+            // Crear modal con estadísticas
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+
+            const contenido = document.createElement('div');
+            contenido.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            `;
+
+            let html = `
+                <h2 style="color: #4facfe; margin-bottom: 20px; text-align: center;">📊 Estadísticas de Sincronización</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 2em; color: #28a745; font-weight: bold;">${estadisticas.productos_nuevos}</div>
+                        <div style="color: #666;">Productos Nuevos</div>
+                    </div>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 2em; color: #ffc107; font-weight: bold;">${estadisticas.productos_actualizados}</div>
+                        <div style="color: #666;">Productos Existentes</div>
+                    </div>
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 2em; color: #dc3545; font-weight: bold;">${estadisticas.productos_eliminados || 0}</div>
+                        <div style="color: #666;">Productos Eliminados</div>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #333; margin-bottom: 10px;">📈 Resumen</h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li>Total productos en inventario: <strong>${estadisticas.total_productos}</strong></li>
+                        <li>Productos existentes antes: <strong>${estadisticas.productos_existentes}</strong></li>
+                        <li>Productos nuevos agregados: <strong>${estadisticas.productos_nuevos}</strong></li>
+                        <li>Productos verificados: <strong>${estadisticas.productos_actualizados}</strong></li>
+                        <li>Productos eliminados del CSV: <strong style="color: #dc3545;">${estadisticas.productos_eliminados || 0}</strong></li>
+                    </ul>
+                </div>
+            `;
+
+            // Mostrar top laboratorios si hay datos
+            if (estadisticas.laboratorios && Object.keys(estadisticas.laboratorios).length > 0) {
+                html += `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #333; margin-bottom: 10px;">🏢 Productos Nuevos por Laboratorio</h3>
+                        <div style="max-height: 150px; overflow-y: auto;">
+                `;
+                
+                const sortedLabs = Object.entries(estadisticas.laboratorios)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10);
+                
+                for (const [lab, count] of sortedLabs) {
+                    html += `<div style="padding: 5px 0; border-bottom: 1px solid #eee;">
+                        <span style="font-weight: 600;">${lab}:</span> ${count} productos
+                    </div>`;
+                }
+                
+                html += `</div></div>`;
+            }
+
+            // Mostrar productos eliminados si hay datos
+            if (estadisticas.productos_eliminados_lista && estadisticas.productos_eliminados_lista.length > 0) {
+                html += `
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #dc3545; margin-bottom: 10px;">🗑️ Productos Eliminados del CSV</h3>
+                        <p style="color: #721c24; font-size: 0.9em; margin-bottom: 10px;">
+                            ⚠️ Estos productos están en la base de datos pero ya no aparecen en el archivo CSV.
+                        </p>
+                        <div style="max-height: 200px; overflow-y: auto; background: white; border-radius: 6px; padding: 10px;">
+                `;
+                
+                const sortedEliminados = estadisticas.productos_eliminados_lista
+                    .sort((a, b) => a.laboratorio.localeCompare(b.laboratorio))
+                    .slice(0, 20); // Mostrar solo los primeros 20
+                
+                for (const producto of sortedEliminados) {
+                    html += `<div style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9em;">
+                        <div style="font-weight: 600; color: #dc3545;">${producto.medicamento}</div>
+                        <div style="color: #666; font-size: 0.8em;">
+                            ${producto.laboratorio} - ${producto.presentacion}
+                            ${producto.stock > 0 ? `(Stock: ${producto.stock})` : '(Sin stock)'}
+                        </div>
+                    </div>`;
+                }
+                
+                if (estadisticas.productos_eliminados_lista.length > 20) {
+                    html += `<div style="padding: 8px 0; color: #666; font-style: italic; text-align: center;">
+                        ... y ${estadisticas.productos_eliminados_lista.length - 20} productos más
+                    </div>`;
+                }
+                
+                html += `</div></div>`;
+            }
+
+            // Mostrar categorías si hay datos
+            if (estadisticas.categorias && Object.keys(estadisticas.categorias).length > 0) {
+                html += `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #333; margin-bottom: 10px;">📂 Productos Nuevos por Categoría</h3>
+                        <div style="max-height: 150px; overflow-y: auto;">
+                `;
+                
+                const sortedCats = Object.entries(estadisticas.categorias)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10);
+                
+                for (const [cat, count] of sortedCats) {
+                    html += `<div style="padding: 5px 0; border-bottom: 1px solid #eee;">
+                        <span style="font-weight: 600;">${cat.substring(0, 50)}${cat.length > 50 ? '...' : ''}:</span> ${count} productos
+                    </div>`;
+                }
+                
+                html += `</div></div>`;
+            }
+
+            html += `
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="this.closest('.modal').remove()" style="
+                        background: #4facfe;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Cerrar</button>
+                </div>
+            `;
+
+            contenido.innerHTML = html;
+            modal.appendChild(contenido);
+            modal.className = 'modal';
+            document.body.appendChild(modal);
+
+            // Cerrar modal al hacer clic fuera
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+                         });
+         }
+
+         function eliminarProductosObsoletos() {
+             if (!confirm('⚠️ ¿Estás seguro de que quieres eliminar productos obsoletos?\n\nEsto eliminará productos que ya no están en el archivo CSV. Se creará un backup antes de la eliminación.')) {
+                 return;
+             }
+
+             // Mostrar loading
+             const btn = event.target;
+             const originalText = btn.textContent;
+             btn.textContent = '🗑️ Eliminando...';
+             btn.disabled = true;
+
+             fetch('/eliminar_productos_obsoletos', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 }
+             })
+             .then(response => response.json())
+             .then(data => {
+                 btn.textContent = originalText;
+                 btn.disabled = false;
+
+                 if (data.success) {
+                     // Mostrar estadísticas de eliminación
+                     mostrarEstadisticasEliminacion(data.estadisticas);
+                     showAlert(data.message, 'success');
+                     // Recargar la página para mostrar los cambios
+                     setTimeout(() => {
+                         location.reload();
+                     }, 5000);
+                 } else {
+                     showAlert(data.message, 'error');
+                 }
+             })
+             .catch(error => {
+                 btn.textContent = originalText;
+                 btn.disabled = false;
+                 showAlert('Error al eliminar productos obsoletos', 'error');
+                 console.error('Error:', error);
+             });
+         }
+
+         function mostrarEstadisticasEliminacion(estadisticas) {
+             // Crear modal con estadísticas de eliminación
+             const modal = document.createElement('div');
+             modal.style.cssText = `
+                 position: fixed;
+                 top: 0;
+                 left: 0;
+                 width: 100%;
+                 height: 100%;
+                 background: rgba(0,0,0,0.7);
+                 display: flex;
+                 justify-content: center;
+                 align-items: center;
+                 z-index: 1000;
+             `;
+
+             const contenido = document.createElement('div');
+             contenido.style.cssText = `
+                 background: white;
+                 padding: 30px;
+                 border-radius: 15px;
+                 max-width: 600px;
+                 max-height: 80vh;
+                 overflow-y: auto;
+                 box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+             `;
+
+             let html = `
+                 <h2 style="color: #dc3545; margin-bottom: 20px; text-align: center;">🗑️ Productos Obsoletos Eliminados</h2>
+                 
+                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                     <div style="background: #f8d7da; padding: 15px; border-radius: 8px; text-align: center;">
+                         <div style="font-size: 2em; color: #dc3545; font-weight: bold;">${estadisticas.productos_eliminados}</div>
+                         <div style="color: #666;">Total Eliminados</div>
+                     </div>
+                     <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center;">
+                         <div style="font-size: 2em; color: #ffc107; font-weight: bold;">${estadisticas.productos_con_stock}</div>
+                         <div style="color: #666;">Con Stock</div>
+                     </div>
+                     <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                         <div style="font-size: 2em; color: #28a745; font-weight: bold;">${estadisticas.productos_sin_stock}</div>
+                         <div style="color: #666;">Sin Stock</div>
+                     </div>
+                 </div>
+
+                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                     <h3 style="color: #333; margin-bottom: 10px;">📈 Resumen de Eliminación</h3>
+                     <ul style="margin: 0; padding-left: 20px;">
+                         <li>Total productos antes: <strong>${estadisticas.total_productos_bd}</strong></li>
+                         <li>Productos eliminados: <strong style="color: #dc3545;">${estadisticas.productos_eliminados}</strong></li>
+                         <li>Productos con stock eliminados: <strong style="color: #ffc107;">${estadisticas.productos_con_stock}</strong></li>
+                         <li>Productos sin stock eliminados: <strong style="color: #28a745;">${estadisticas.productos_sin_stock}</strong></li>
+                     </ul>
+                 </div>
+             `;
+
+             // Mostrar laboratorios afectados si hay datos
+             if (estadisticas.laboratorios_afectados && Object.keys(estadisticas.laboratorios_afectados).length > 0) {
+                 html += `
+                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                         <h3 style="color: #333; margin-bottom: 10px;">🏢 Laboratorios Afectados</h3>
+                         <div style="max-height: 150px; overflow-y: auto;">
+                 `;
+                 
+                 const sortedLabs = Object.entries(estadisticas.laboratorios_afectados)
+                     .sort(([,a], [,b]) => b - a)
+                     .slice(0, 10);
+                 
+                 for (const [lab, count] of sortedLabs) {
+                     html += `<div style="padding: 5px 0; border-bottom: 1px solid #eee;">
+                         <span style="font-weight: 600;">${lab}:</span> ${count} productos eliminados
+                     </div>`;
+                 }
+                 
+                 html += `</div></div>`;
+             }
+
+             html += `
+                 <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                     <h3 style="color: #856404; margin-bottom: 10px;">⚠️ Información Importante</h3>
+                     <ul style="margin: 0; padding-left: 20px; color: #856404;">
+                         <li>Se creó un backup antes de la eliminación</li>
+                         <li>Los productos eliminados ya no aparecen en el CSV</li>
+                         <li>Si necesitas restaurar, usa el archivo de backup</li>
+                     </ul>
+                 </div>
+
+                 <div style="text-align: center; margin-top: 20px;">
+                     <button onclick="this.closest('.modal').remove()" style="
+                         background: #dc3545;
+                         color: white;
+                         border: none;
+                         padding: 10px 20px;
+                         border-radius: 6px;
+                         cursor: pointer;
+                         font-weight: 600;
+                     ">Cerrar</button>
+                 </div>
+             `;
+
+             contenido.innerHTML = html;
+             modal.appendChild(contenido);
+             modal.className = 'modal';
+             document.body.appendChild(modal);
+
+             // Cerrar modal al hacer clic fuera
+             modal.addEventListener('click', function(e) {
+                 if (e.target === modal) {
+                     modal.remove();
+                 }
+             });
+         }
+
+         function mostrarCargadorExcel() {
+             // Crear modal para cargar archivo Excel
+             const modal = document.createElement('div');
+             modal.style.cssText = `
+                 position: fixed;
+                 top: 0;
+                 left: 0;
+                 width: 100%;
+                 height: 100%;
+                 background: rgba(0,0,0,0.7);
+                 display: flex;
+                 justify-content: center;
+                 align-items: center;
+                 z-index: 1000;
+             `;
+
+             const contenido = document.createElement('div');
+             contenido.style.cssText = `
+                 background: white;
+                 padding: 30px;
+                 border-radius: 15px;
+                 max-width: 500px;
+                 width: 90%;
+                 box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+             `;
+
+             contenido.innerHTML = `
+                 <h2 style="color: #17a2b8; margin-bottom: 20px; text-align: center;">📁 Cargar Archivo Excel</h2>
+                 
+                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                     <h3 style="color: #333; margin-bottom: 15px;">📋 Instrucciones</h3>
+                     <ul style="margin: 0; padding-left: 20px; color: #666;">
+                         <li>Selecciona el archivo Excel original del inventario</li>
+                         <li>El sistema procesará automáticamente los datos</li>
+                         <li>Se creará un backup antes de procesar</li>
+                         <li>Se reemplazará todo el inventario actual</li>
+                     </ul>
+                 </div>
+
+                 <form id="formExcel" enctype="multipart/form-data">
+                     <div style="margin-bottom: 20px;">
+                         <label for="archivoExcel" style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
+                             Seleccionar archivo Excel (.xlsx, .xls)
+                         </label>
+                         <input type="file" id="archivoExcel" name="archivo" accept=".xlsx,.xls" required 
+                                style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+                     </div>
+
+                     <div style="display: flex; gap: 10px; justify-content: center;">
+                         <button type="button" onclick="this.closest('.modal').remove()" style="
+                             background: #6c757d;
+                             color: white;
+                             border: none;
+                             padding: 10px 20px;
+                             border-radius: 6px;
+                             cursor: pointer;
+                             font-weight: 600;
+                         ">Cancelar</button>
+                         <button type="submit" style="
+                             background: #17a2b8;
+                             color: white;
+                             border: none;
+                             padding: 10px 20px;
+                             border-radius: 6px;
+                             cursor: pointer;
+                             font-weight: 600;
+                         ">📤 Cargar y Procesar</button>
+                     </div>
+                 </form>
+
+                 <div id="loadingExcel" style="display: none; text-align: center; margin-top: 20px;">
+                     <div style="border: 2px solid #f3f3f3; border-top: 2px solid #17a2b8; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                     <p style="color: #666;">Procesando archivo Excel...</p>
+                 </div>
+             `;
+
+             modal.appendChild(contenido);
+             modal.className = 'modal';
+             document.body.appendChild(modal);
+
+             // Manejar envío del formulario
+             document.getElementById('formExcel').addEventListener('submit', function(e) {
+                 e.preventDefault();
+                 cargarArchivoExcel();
+             });
+
+             // Cerrar modal al hacer clic fuera
+             modal.addEventListener('click', function(e) {
+                 if (e.target === modal) {
+                     modal.remove();
+                 }
+             });
+         }
+
+         function cargarArchivoExcel() {
+             const archivo = document.getElementById('archivoExcel').files[0];
+             if (!archivo) {
+                 showAlert('Por favor selecciona un archivo Excel', 'error');
+                 return;
+             }
+
+             // Mostrar loading
+             document.getElementById('loadingExcel').style.display = 'block';
+             document.querySelector('#formExcel button[type="submit"]').disabled = true;
+
+             // Crear FormData
+             const formData = new FormData();
+             formData.append('archivo', archivo);
+
+             // Enviar archivo
+             fetch('/cargar_excel', {
+                 method: 'POST',
+                 body: formData
+             })
+             .then(response => response.json())
+             .then(data => {
+                 document.getElementById('loadingExcel').style.display = 'none';
+                 document.querySelector('#formExcel button[type="submit"]').disabled = false;
+
+                 if (data.success) {
+                     // Mostrar estadísticas de procesamiento
+                     mostrarEstadisticasExcel(data.estadisticas);
+                     showAlert(data.message, 'success');
+                     // Cerrar modal
+                     document.querySelector('.modal').remove();
+                     // Recargar la página para mostrar los nuevos productos
+                     setTimeout(() => {
+                         location.reload();
+                     }, 5000);
+                 } else {
+                     showAlert(data.message, 'error');
+                 }
+             })
+             .catch(error => {
+                 document.getElementById('loadingExcel').style.display = 'none';
+                 document.querySelector('#formExcel button[type="submit"]').disabled = false;
+                 showAlert('Error al cargar archivo Excel', 'error');
+                 console.error('Error:', error);
+             });
+         }
+
+         function mostrarEstadisticasExcel(estadisticas) {
+             // Crear modal con estadísticas de procesamiento de Excel
+             const modal = document.createElement('div');
+             modal.style.cssText = `
+                 position: fixed;
+                 top: 0;
+                 left: 0;
+                 width: 100%;
+                 height: 100%;
+                 background: rgba(0,0,0,0.7);
+                 display: flex;
+                 justify-content: center;
+                 align-items: center;
+                 z-index: 1000;
+             `;
+
+             const contenido = document.createElement('div');
+             contenido.style.cssText = `
+                 background: white;
+                 padding: 30px;
+                 border-radius: 15px;
+                 max-width: 600px;
+                 max-height: 80vh;
+                 overflow-y: auto;
+                 box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+             `;
+
+             let html = `
+                 <h2 style="color: #17a2b8; margin-bottom: 20px; text-align: center;">📊 Excel Procesado Exitosamente</h2>
+                 
+                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                     <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                         <div style="font-size: 2em; color: #28a745; font-weight: bold;">${estadisticas.total_productos}</div>
+                         <div style="color: #666;">Total Productos</div>
+                     </div>
+                     <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center;">
+                         <div style="font-size: 2em; color: #ffc107; font-weight: bold;">${estadisticas.total_laboratorios}</div>
+                         <div style="color: #666;">Laboratorios</div>
+                     </div>
+                     <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; text-align: center;">
+                         <div style="font-size: 2em; color: #17a2b8; font-weight: bold;">${estadisticas.total_categorias}</div>
+                         <div style="color: #666;">Categorías</div>
+                     </div>
+                 </div>
+
+                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                     <h3 style="color: #333; margin-bottom: 10px;">📈 Resumen de Procesamiento</h3>
+                     <ul style="margin: 0; padding-left: 20px;">
+                         <li>Archivo procesado: <strong>${estadisticas.archivo_procesado}</strong></li>
+                         <li>Total productos cargados: <strong>${estadisticas.total_productos}</strong></li>
+                         <li>Total laboratorios: <strong>${estadisticas.total_laboratorios}</strong></li>
+                         <li>Total categorías: <strong>${estadisticas.total_categorias}</strong></li>
+                     </ul>
+                 </div>
+             `;
+
+             // Mostrar top laboratorios si hay datos
+             if (estadisticas.laboratorios && Object.keys(estadisticas.laboratorios).length > 0) {
+                 html += `
+                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                         <h3 style="color: #333; margin-bottom: 10px;">🏢 Top 10 Laboratorios</h3>
+                         <div style="max-height: 150px; overflow-y: auto;">
+                 `;
+                 
+                 const sortedLabs = Object.entries(estadisticas.laboratorios)
+                     .sort(([,a], [,b]) => b - a)
+                     .slice(0, 10);
+                 
+                 for (const [lab, count] of sortedLabs) {
+                     html += `<div style="padding: 5px 0; border-bottom: 1px solid #eee;">
+                         <span style="font-weight: 600;">${lab}:</span> ${count} productos
+                     </div>`;
+                 }
+                 
+                 html += `</div></div>`;
+             }
+
+             // Mostrar categorías si hay datos
+             if (estadisticas.categorias && Object.keys(estadisticas.categorias).length > 0) {
+                 html += `
+                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                         <h3 style="color: #333; margin-bottom: 10px;">📂 Categorías Encontradas</h3>
+                         <div style="max-height: 150px; overflow-y: auto;">
+                 `;
+                 
+                 const sortedCats = Object.entries(estadisticas.categorias)
+                     .sort(([,a], [,b]) => b - a)
+                     .slice(0, 10);
+                 
+                 for (const [cat, count] of sortedCats) {
+                     html += `<div style="padding: 5px 0; border-bottom: 1px solid #eee;">
+                         <span style="font-weight: 600;">${cat.substring(0, 50)}${cat.length > 50 ? '...' : ''}:</span> ${count} productos
+                     </div>`;
+                 }
+                 
+                 html += `</div></div>`;
+             }
+
+             html += `
+                 <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                     <h3 style="color: #0c5460; margin-bottom: 10px;">ℹ️ Información Importante</h3>
+                     <ul style="margin: 0; padding-left: 20px; color: #0c5460;">
+                         <li>Se creó un backup antes del procesamiento</li>
+                         <li>El inventario anterior fue reemplazado completamente</li>
+                         <li>Los productos tienen stock por defecto de 100 unidades</li>
+                         <li>Los precios están establecidos en 0.0 por defecto</li>
+                     </ul>
+                 </div>
+
+                 <div style="text-align: center; margin-top: 20px;">
+                     <button onclick="this.closest('.modal').remove()" style="
+                         background: #17a2b8;
+                         color: white;
+                         border: none;
+                         padding: 10px 20px;
+                         border-radius: 6px;
+                         cursor: pointer;
+                         font-weight: 600;
+                     ">Cerrar</button>
+                 </div>
+             `;
+
+             contenido.innerHTML = html;
+             modal.appendChild(contenido);
+             modal.className = 'modal';
+             document.body.appendChild(modal);
+
+             // Cerrar modal al hacer clic fuera
+             modal.addEventListener('click', function(e) {
+                 if (e.target === modal) {
+                     modal.remove();
+                 }
+             });
+         }
+     </script>
+ </body>
+ </html> 

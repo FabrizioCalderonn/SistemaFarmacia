@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - Sistema de Farmacia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .filters-container {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .content-container {
+            padding: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .inventory-table th {
+            background: #4facfe;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .inventory-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .inventory-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .stock-low {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .stock-zero {
+            color: #dc3545;
+            font-weight: bold;
+            background: #f8d7da;
+        }
+
+        .stock-ok {
+            color: #28a745;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            border: 2px solid #4facfe;
+            background: white;
+            color: #4facfe;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #4facfe;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Inventario de Productos</h1>
+            <p>Gestión y Control de Stock</p>
+        </div>
+
+        <div class="filters-container">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label for="laboratorio">Laboratorio</label>
+                    <input type="text" id="laboratorio" placeholder="Filtrar por laboratorio...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="producto">Producto</label>
+                    <input type="text" id="producto" placeholder="Buscar producto...">
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="stock_bajo">
+                        <label for="stock_bajo">Stock Bajo (< 10)</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="sin_stock">
+                        <label for="sin_stock">Sin Stock</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="cargarInventario()">🔍 Filtrar</button>
+                    <button class="btn btn-secondary" onclick="limpiarFiltros()">🔄 Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalProductos">0</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stockBajo">0</div>
+                <div class="stat-label">Stock Bajo</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="sinStock">0</div>
+                <div class="stat-label">Sin Stock</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalValor">$0</div>
+                <div class="stat-label">Valor Total</div>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <div class="table-container">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Laboratorio</th>
+                            <th>Producto</th>
+                            <th>Presentación</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventarioTable">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="spinner"></div>
+                                <p>Cargando inventario...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="/" class="nav-btn">🏠 Inicio</a>
+                <a href="/historial" class="nav-btn">📋 Historial</a>
+                <a href="/exportar_excel" class="nav-btn">📊 Exportar Excel</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar inventario al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarInventario();
+        });
+
+        function cargarInventario() {
+            const laboratorio = document.getElementById('laboratorio').value;
+            const stockBajo = document.getElementById('stock_bajo').checked;
+            const sinStock = document.getElementById('sin_stock').checked;
+            
+            // Mostrar loading
+            document.getElementById('inventarioTable').innerHTML = `
+                <tr>
+                    <td colspan="6" class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando inventario...</p>
+                    </td>
+                </tr>
+            `;
+            
+            // Construir URL con filtros
+            const params = new URLSearchParams();
+            if (laboratorio) params.append('laboratorio', laboratorio);
+            if (stockBajo) params.append('stock_bajo', 'true');
+            if (sinStock) params.append('sin_stock', 'true');
+            
+            fetch(`/api/inventario?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    mostrarInventario(data);
+                    actualizarEstadisticas(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('inventarioTable').innerHTML = `
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <p>Error al cargar el inventario: ${error.message}</p>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function mostrarInventario(productos) {
+            const tbody = document.getElementById('inventarioTable');
+            
+            if (productos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="loading">
+                            <p>No se encontraron productos con los filtros aplicados</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = productos.map(producto => {
+                const valorTotal = producto.precio * producto.stock;
+                let stockClass = 'stock-ok';
+                let stockText = producto.stock;
+                
+                if (producto.stock === 0) {
+                    stockClass = 'stock-zero';
+                    stockText = 'SIN STOCK';
+                } else if (producto.stock < 10) {
+                    stockClass = 'stock-low';
+                }
+                
+                return `
+                    <tr>
+                        <td>${producto.laboratorio}</td>
+                        <td>${producto.medicamento}</td>
+                        <td>${producto.presentacion || '-'}</td>
+                        <td>$${producto.precio.toFixed(2)}</td>
+                        <td class="${stockClass}">${stockText}</td>
+                        <td>$${valorTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function actualizarEstadisticas(productos) {
+            const totalProductos = productos.length;
+            const stockBajo = productos.filter(p => p.stock < 10 && p.stock > 0).length;
+            const sinStock = productos.filter(p => p.stock === 0).length;
+            const totalValor = productos.reduce((sum, p) => sum + (p.precio * p.stock), 0);
+            
+            document.getElementById('totalProductos').textContent = totalProductos;
+            document.getElementById('stockBajo').textContent = stockBajo;
+            document.getElementById('sinStock').textContent = sinStock;
+            document.getElementById('totalValor').textContent = `$${totalValor.toFixed(2)}`;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('laboratorio').value = '';
+            document.getElementById('producto').value = '';
+            document.getElementById('stock_bajo').checked = false;
+            document.getElementById('sin_stock').checked = false;
+            cargarInventario();
+        }
+
+        // Búsqueda en tiempo real
+        let searchTimeout;
+        document.getElementById('producto').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                cargarInventario();
+            }, 500);
+        });
+
+        // Filtros automáticos
+        document.getElementById('stock_bajo').addEventListener('change', cargarInventario);
+        document.getElementById('sin_stock').addEventListener('change', cargarInventario);
+    </script>
+</body>
+</html> 

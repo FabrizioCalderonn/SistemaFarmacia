@@ -1,0 +1,44 @@
+# Base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de backup
+backups/
+*.backup
+
+# Archivos temporales
+*.tmp
+*.temp
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Archivos de Excel temporales
+excel_upload_*.xlsx
+registros_farmacia_*.xlsx
+
+# Variables de entorno locales
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de Windows
+*.lnk 

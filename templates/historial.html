@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial - Sistema de Farmacia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .filters-container {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .content-container {
+            padding: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .history-table th {
+            background: #4facfe;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .history-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .tipo-venta {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            border: 2px solid #4facfe;
+            background: white;
+            color: #4facfe;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #4facfe;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .total-row {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Historial de Ventas</h1>
+            <p>Registro de Ventas Realizadas</p>
+        </div>
+
+        <div class="filters-container">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label for="fecha_inicio">Fecha Ingreso Inicio</label>
+                    <input type="date" id="fecha_inicio">
+                </div>
+                
+                <div class="form-group">
+                    <label for="fecha_fin">Fecha Ingreso Fin</label>
+                    <input type="date" id="fecha_fin">
+                </div>
+                
+                <div class="form-group">
+                    <label for="laboratorio">Laboratorio</label>
+                    <input type="text" id="laboratorio" placeholder="Filtrar por laboratorio...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="medicamento">Medicamento</label>
+                    <input type="text" id="medicamento" placeholder="Buscar medicamento...">
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="cargarRegistros()">🔍 Filtrar</button>
+                    <button class="btn btn-secondary" onclick="limpiarFiltros()">🔄 Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalRegistros">0</div>
+                <div class="stat-label">Total Registros</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalVentas">0</div>
+                <div class="stat-label">Transacciones</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalProductos">0</div>
+                <div class="stat-label">Productos Comprados</div>
+            </div>
+            
+        </div>
+
+        <div class="content-container">
+            <div class="table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha Ingreso</th>
+                            <th>Medicamento</th>
+                            <th>Laboratorio</th>
+                            <th>Cantidad</th>
+                            <th>Fecha Compra</th>
+                            <th>Vencimiento</th>
+                            <th>Lote</th>
+                            <th>Médico</th>
+                            <th>Junta Vig.</th>
+                            <th>Inscripción Clínica</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrosTable">
+                        <tr>
+                            <td colspan="11" class="loading">
+                                <div class="spinner"></div>
+                                <p>Cargando registros...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="/" class="nav-btn">🏠 Inicio</a>
+                <!--	<a href="/inventario" class="nav-btn">📦 Inventario</a-->
+                <a href="/exportar_excel" class="nav-btn">📊 Exportar Excel</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar registro -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">✏️ Editar Registro</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form class="modal-form" id="editForm">
+                <input type="hidden" id="editId">
+                
+                <div class="form-group">
+                    <label for="editLaboratorio">Laboratorio</label>
+                    <input type="text" id="editLaboratorio" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editLaboratorio">Laboratorio</label>
+                    <select id="editLaboratorio" required>
+                        <option value="">Seleccione un laboratorio</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMedicamento">Medicamento</label>
+                    <select id="editMedicamento" required disabled>
+                        <option value="">Primero seleccione un laboratorio</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCantidad">Cantidad</label>
+                    <input type="number" id="editCantidad" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editFecha">Fecha de Compra</label>
+                    <input type="date" id="editFecha" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editFechaIngreso">Fecha de Ingreso (Solo lectura)</label>
+                    <input type="text" id="editFechaIngreso" readonly style="background-color: #f8f9fa;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editFechaVencimiento">Fecha Vencimiento</label>
+                    <input type="date" id="editFechaVencimiento">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editLote">Lote</label>
+                    <input type="text" id="editLote">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMedico">Médico</label>
+                    <input type="text" id="editMedico">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editJuntaVigilancia">Junta Vigilancia</label>
+                    <input type="text" id="editJuntaVigilancia">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editNumeroInscripcionClinica">Número de Inscripción de la Clínica</label>
+                    <input type="text" id="editNumeroInscripcionClinica">
+                </div>
+                
+                <div class="form-group form-group-full">
+                    <label for="editObservaciones">Observaciones</label>
+                    <textarea id="editObservaciones" rows="3"></textarea>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">❌ Cancelar</button>
+                    <button type="submit" class="btn">💾 Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Cargar registros sin filtros por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarRegistros();
+        });
+
+        function cargarRegistros() {
+            const fechaInicio = document.getElementById('fecha_inicio').value;
+            const fechaFin = document.getElementById('fecha_fin').value;
+            const laboratorio = document.getElementById('laboratorio').value;
+            const medicamento = document.getElementById('medicamento').value;
+            
+            // Mostrar loading
+            document.getElementById('registrosTable').innerHTML = `
+                <tr>
+                    <td colspan="13" class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando registros...</p>
+                    </td>
+                </tr>
+            `;
+            
+            // Construir URL con filtros
+            const params = new URLSearchParams();
+            if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+            if (fechaFin) params.append('fecha_fin', fechaFin);
+            if (laboratorio) params.append('laboratorio', laboratorio);
+            if (medicamento) params.append('medicamento', medicamento);
+            
+            fetch(`/api/registros?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    mostrarRegistros(data);
+                    actualizarEstadisticas(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('registrosTable').innerHTML = `
+                                            <tr>
+                        <td colspan="13" class="loading">
+                            <p>Error al cargar los registros: ${error.message}</p>
+                        </td>
+                    </tr>
+                    `;
+                });
+        }
+
+
+
+        function actualizarEstadisticas(registros) {
+            const totalRegistros = registros.length;
+            const totalProductos = registros.reduce((sum, r) => sum + r.cantidad, 0);
+            
+            document.getElementById('totalRegistros').textContent = totalRegistros;
+            document.getElementById('totalVentas').textContent = totalRegistros;
+            document.getElementById('totalProductos').textContent = totalProductos;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('fecha_fin').value = '';
+            document.getElementById('fecha_inicio').value = '';
+            document.getElementById('laboratorio').value = '';
+            document.getElementById('medicamento').value = '';
+            cargarRegistros();
+        }
+
+        // Búsqueda en tiempo real
+        let searchTimeout;
+        document.getElementById('medicamento').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                cargarRegistros();
+            }, 500);
+        });
+
+        document.getElementById('laboratorio').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                cargarRegistros();
+            }, 500);
+        });
+
+        // Funciones para editar y eliminar registros
+        function editarRegistro(id) {
+            // Buscar el registro en los datos actuales
+            const registro = registrosActuales.find(r => r.id === id);
+            if (!registro) {
+                alert('Registro no encontrado');
+                return;
+            }
+
+            // Mostrar el modal
+            document.getElementById('editModal').style.display = 'block';
+            
+            // Cargar laboratorios y luego llenar el formulario
+            cargarLaboratoriosModal();
+            
+            // Esperar un momento para que se carguen los laboratorios
+            setTimeout(() => {
+                // Llenar el formulario con los datos del registro
+                document.getElementById('editId').value = registro.id;
+                document.getElementById('editLaboratorio').value = registro.laboratorio;
+                
+                // Cargar medicamentos del laboratorio seleccionado
+                const laboratorio = registro.laboratorio;
+                const medicamentoSelect = document.getElementById('editMedicamento');
+                
+                fetch(`/api/medicamentos/${encodeURIComponent(laboratorio)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        medicamentoSelect.innerHTML = '<option value="">Seleccione un medicamento</option>';
+                        
+                        data.forEach(med => {
+                            const option = document.createElement('option');
+                            option.value = med[0]; // medicamento
+                            option.textContent = `${med[0]} - ${med[1]}`; // medicamento - presentacion
+                            medicamentoSelect.appendChild(option);
+                        });
+                        
+                        medicamentoSelect.disabled = false;
+                        medicamentoSelect.value = registro.medicamento;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                
+                document.getElementById('editCantidad').value = registro.cantidad;
+                
+                // Convertir fecha para date
+                const fecha = new Date(registro.fecha);
+                document.getElementById('editFecha').value = fecha.toISOString().split('T')[0];
+                
+                // Mostrar fecha de ingreso (solo lectura)
+                const fechaIngreso = new Date(registro.fecha_ingreso);
+                document.getElementById('editFechaIngreso').value = fechaIngreso.toLocaleString('es-ES');
+                
+                document.getElementById('editFechaVencimiento').value = registro.fecha_vencimiento || '';
+                document.getElementById('editLote').value = registro.lote || '';
+                document.getElementById('editMedico').value = registro.medico || '';
+                document.getElementById('editJuntaVigilancia').value = registro.junta_vigilancia || '';
+                document.getElementById('editNumeroInscripcionClinica').value = registro.numero_inscripcion_clinica || '';
+                document.getElementById('editObservaciones').value = registro.observaciones || '';
+            }, 100);
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function eliminarRegistro(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            fetch(`/api/registros/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Registro eliminado exitosamente');
+                    cargarRegistros();
+                } else {
+                    alert('Error al eliminar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar el registro');
+            });
+        }
+
+        // Variable global para almacenar los registros actuales
+        let registrosActuales = [];
+
+        // Actualizar la función mostrarRegistros para guardar los datos
+        function mostrarRegistros(registros) {
+            registrosActuales = registros; // Guardar para uso en edición
+            
+            const tbody = document.getElementById('registrosTable');
+            
+            if (registros.length === 0) {
+                                 tbody.innerHTML = `
+                     <tr>
+                         <td colspan="13" class="loading">
+                             <p>No se encontraron registros con los filtros aplicados</p>
+                         </td>
+                     </tr>
+                 `;
+                return;
+            }
+            
+            let totalGeneral = 0;
+            
+            tbody.innerHTML = registros.map(registro => {
+                totalGeneral += registro.total;
+                
+                const fechaCompra = new Date(registro.fecha).toLocaleDateString('es-ES');
+                const fechaIngreso = new Date(registro.fecha_ingreso).toLocaleString('es-ES');
+                                 const tipoClass = 'tipo-venta';
+                
+                                 return `
+                     <tr>
+                         <td>${fechaIngreso}</td>
+                         <td>${registro.medicamento}</td>
+                         <td>${registro.laboratorio}</td>
+                         <td>${registro.cantidad}</td>
+                         <td>${fechaCompra}</td>
+                         <td>${registro.fecha_vencimiento || '-'}</td>
+                         <td>${registro.lote || '-'}</td>
+                         <td>${registro.medico || '-'}</td>
+                         <td>${registro.junta_vigilancia || '-'}</td>
+                         <td>${registro.numero_inscripcion_clinica || '-'}</td>
+                         <td>${registro.observaciones || '-'}</td>
+                         <td>
+                             <button class="btn-delete" onclick="eliminarRegistro(${registro.id})">🗑️ Eliminar</button>
+                         </td>
+                     </tr>
+                 `;
+            })
+        }
+
+        // Manejar el envío del formulario de edición
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('editId').value;
+            const data = {
+                laboratorio: document.getElementById('editLaboratorio').value,
+                medicamento: document.getElementById('editMedicamento').value,
+                cantidad: parseInt(document.getElementById('editCantidad').value),
+                fecha: document.getElementById('editFecha').value,
+                fecha_vencimiento: document.getElementById('editFechaVencimiento').value,
+                lote: document.getElementById('editLote').value,
+                medico: document.getElementById('editMedico').value,
+                junta_vigilancia: document.getElementById('editJuntaVigilancia').value,
+                numero_inscripcion_clinica: document.getElementById('editNumeroInscripcionClinica').value,
+                observaciones: document.getElementById('editObservaciones').value
+            };
+
+            fetch(`/api/registros/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Registro actualizado exitosamente');
+                    closeModal();
+                    cargarRegistros();
+                } else {
+                    alert('Error al actualizar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar el registro');
+            });
+        });
+
+        // Cargar laboratorios al abrir el modal
+        function cargarLaboratoriosModal() {
+            fetch('/api/laboratorios')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('editLaboratorio');
+                    select.innerHTML = '<option value="">Seleccione un laboratorio</option>';
+                    
+                    data.forEach(lab => {
+                        const option = document.createElement('option');
+                        option.value = lab;
+                        option.textContent = lab;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar laboratorios:', error);
+                });
+        }
+
+        // Cargar medicamentos cuando se selecciona laboratorio en el modal
+        document.getElementById('editLaboratorio').addEventListener('change', function() {
+            const laboratorio = this.value;
+            const medicamentoSelect = document.getElementById('editMedicamento');
+            
+            if (laboratorio) {
+                fetch(`/api/medicamentos/${encodeURIComponent(laboratorio)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        medicamentoSelect.innerHTML = '<option value="">Seleccione un medicamento</option>';
+                        
+                        data.forEach(med => {
+                            const option = document.createElement('option');
+                            option.value = med[0]; // medicamento
+                            option.textContent = `${med[0]} - ${med[1]}`; // medicamento - presentacion
+                            medicamentoSelect.appendChild(option);
+                        });
+                        
+                        medicamentoSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            } else {
+                medicamentoSelect.innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
+                medicamentoSelect.disabled = true;
+            }
+        });
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html> 
