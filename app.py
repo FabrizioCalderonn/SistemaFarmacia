@@ -43,24 +43,12 @@ def get_db_connection():
         return sqlite3.connect(DATABASE)
 
 def init_db():
-    """Inicializar la base de datos y crear tablas"""
+    """Inicializar la base de datos y crear solo tabla de registros"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
     if DATABASE_TYPE == 'postgresql':
-        # Crear tabla de inventario para PostgreSQL
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS inventario (
-                id SERIAL PRIMARY KEY,
-                laboratorio TEXT NOT NULL,
-                medicamento TEXT NOT NULL,
-                presentacion TEXT,
-                precio REAL DEFAULT 0.0,
-                stock INTEGER DEFAULT 0
-            )
-        ''')
-        
-        # Crear tabla de registros para PostgreSQL
+        # Crear tabla de registros para PostgreSQL (inventario se lee desde CSV)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS registros (
                 id SERIAL PRIMARY KEY,
@@ -80,19 +68,7 @@ def init_db():
             )
         ''')
     else:
-        # Crear tabla de inventario para SQLite
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS inventario (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                laboratorio TEXT NOT NULL,
-                medicamento TEXT NOT NULL,
-                presentacion TEXT,
-                precio REAL DEFAULT 0.0,
-                stock INTEGER DEFAULT 0
-            )
-        ''')
-        
-        # Crear tabla de registros para SQLite
+        # Crear tabla de registros para SQLite (inventario se lee desde CSV)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS registros (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -167,108 +143,120 @@ def procesar_excel_web(archivo):
         return False, f"Error: {str(e)}"
 
 def get_laboratorios():
-    """Obtener lista de laboratorios únicos"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('SELECT DISTINCT laboratorio FROM inventario ORDER BY laboratorio')
-    else:
-        cursor.execute('SELECT DISTINCT laboratorio FROM inventario ORDER BY laboratorio')
-    laboratorios = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return laboratorios
+    """Obtener lista de laboratorios únicos desde CSV"""
+    try:
+        if not os.path.exists('INVENTARIO PARA TRABAJO.csv'):
+            return []
+        
+        laboratorios = set()
+        with open('INVENTARIO PARA TRABAJO.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row.get('laboratorio'):
+                    laboratorios.add(row['laboratorio'])
+        
+        return sorted(list(laboratorios))
+    except Exception as e:
+        print(f"Error al obtener laboratorios: {e}")
+        return []
 
 def get_medicamentos_by_laboratorio(laboratorio):
-    """Obtener medicamentos por laboratorio"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('''
-            SELECT medicamento, presentacion, precio, stock 
-            FROM inventario 
-            WHERE laboratorio = ? 
-            ORDER BY medicamento
-        ''', (laboratorio,))
-    else:
-        cursor.execute('''
-            SELECT medicamento, presentacion, precio, stock 
-            FROM inventario 
-            WHERE laboratorio = ? 
-            ORDER BY medicamento
-        ''', (laboratorio,))
-    medicamentos = cursor.fetchall()
-    conn.close()
-    return medicamentos
+    """Obtener medicamentos por laboratorio desde CSV"""
+    try:
+        if not os.path.exists('INVENTARIO PARA TRABAJO.csv'):
+            return []
+        
+        medicamentos = []
+        with open('INVENTARIO PARA TRABAJO.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row.get('laboratorio') == laboratorio:
+                    medicamentos.append((
+                        row.get('medicamento', ''),
+                        row.get('presentacion', ''),
+                        float(row.get('precio', 0)),
+                        int(row.get('stock', 0))
+                    ))
+        
+        return medicamentos
+    except Exception as e:
+        print(f"Error al obtener medicamentos: {e}")
+        return []
 
 def buscar_productos(termino):
-    """Buscar productos por nombre o presentación"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('''
-            SELECT laboratorio, medicamento, presentacion, precio, stock 
-            FROM inventario 
-            WHERE medicamento LIKE ? OR presentacion LIKE ?
-            ORDER BY medicamento
-            LIMIT 50
-        ''', (f'%{termino}%', f'%{termino}%'))
-    else:
-        cursor.execute('''
-            SELECT laboratorio, medicamento, presentacion, precio, stock 
-            FROM inventario 
-            WHERE medicamento LIKE ? OR presentacion LIKE ?
-            ORDER BY medicamento
-            LIMIT 50
-        ''', (f'%{termino}%', f'%{termino}%'))
-    productos = cursor.fetchall()
-    conn.close()
-    return productos
+    """Buscar productos por nombre o presentación desde CSV"""
+    try:
+        if not os.path.exists('INVENTARIO PARA TRABAJO.csv'):
+            return []
+        
+        termino = termino.lower()
+        productos = []
+        with open('INVENTARIO PARA TRABAJO.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                medicamento = row.get('medicamento', '').lower()
+                presentacion = row.get('presentacion', '').lower()
+                
+                if termino in medicamento or termino in presentacion:
+                    productos.append({
+                        'laboratorio': row.get('laboratorio', ''),
+                        'medicamento': row.get('medicamento', ''),
+                        'presentacion': row.get('presentacion', ''),
+                        'precio': float(row.get('precio', 0)),
+                        'stock': int(row.get('stock', 0))
+                    })
+        
+        return productos
+    except Exception as e:
+        print(f"Error al buscar productos: {e}")
+        return []
 
 def get_estadisticas():
-    """Obtener estadísticas del inventario"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Total de productos
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('SELECT COUNT(*) FROM inventario')
-    else:
-        cursor.execute('SELECT COUNT(*) FROM inventario')
-    total_productos = cursor.fetchone()[0]
-    
-    # Total de laboratorios
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('SELECT COUNT(DISTINCT laboratorio) FROM inventario')
-    else:
-        cursor.execute('SELECT COUNT(DISTINCT laboratorio) FROM inventario')
-    total_laboratorios = cursor.fetchone()[0]
-    
-    # Productos con stock bajo (menos de 10)
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('SELECT COUNT(*) FROM inventario WHERE stock < 10')
-    else:
-        cursor.execute('SELECT COUNT(*) FROM inventario WHERE stock < 10')
-    stock_bajo = cursor.fetchone()[0]
-    
-    # Productos sin stock
-    if DATABASE_TYPE == 'postgresql':
-        cursor.execute('SELECT COUNT(*) FROM inventario WHERE stock = 0')
-    else:
-        cursor.execute('SELECT COUNT(*) FROM inventario WHERE stock = 0')
-    sin_stock = cursor.fetchone()[0]
-    
-    conn.close()
-    
-    return {
-        'total_productos': total_productos,
-        'total_laboratorios': total_laboratorios,
-        'stock_bajo': stock_bajo,
-        'sin_stock': sin_stock
-    }
+    """Obtener estadísticas del inventario desde CSV"""
+    try:
+        if not os.path.exists('INVENTARIO PARA TRABAJO.csv'):
+            return {
+                'total_productos': 0,
+                'total_laboratorios': 0,
+                'stock_bajo': 0,
+                'sin_stock': 0
+            }
+        
+        total_productos = 0
+        laboratorios = set()
+        stock_bajo = 0
+        sin_stock = 0
+        
+        with open('INVENTARIO PARA TRABAJO.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                total_productos += 1
+                if row.get('laboratorio'):
+                    laboratorios.add(row['laboratorio'])
+                
+                stock = int(row.get('stock', 0))
+                if stock == 0:
+                    sin_stock += 1
+                elif stock < 10:
+                    stock_bajo += 1
+        
+        return {
+            'total_productos': total_productos,
+            'total_laboratorios': len(laboratorios),
+            'stock_bajo': stock_bajo,
+            'sin_stock': sin_stock
+        }
+    except Exception as e:
+        print(f"Error al obtener estadísticas: {e}")
+        return {
+            'total_productos': 0,
+            'total_laboratorios': 0,
+            'stock_bajo': 0,
+            'sin_stock': 0
+        }
 
-# Inicializar base de datos
+# Inicializar base de datos (solo para registros, no inventario)
 init_db()
-load_inventory_from_csv()
 
 @app.route('/')
 def index():
@@ -656,7 +644,6 @@ def exportar_excel():
             fecha_ingreso = registro[4]
             if fecha_ingreso:
                 try:
-                    from datetime import datetime
                     fecha_obj = datetime.fromisoformat(fecha_ingreso.replace('Z', '+00:00'))
                     fecha_formateada = fecha_obj.strftime('%d/%m/%Y %H:%M:%S')
                 except:
@@ -835,6 +822,41 @@ def cargar_excel_route():
         else:
             return jsonify({'success': False, 'message': result})
             
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+
+@app.route('/actualizar_inventario_csv', methods=['POST'])
+def actualizar_inventario_csv():
+    """Actualizar el archivo CSV de inventario desde la web"""
+    try:
+        # Verificar si se envió un archivo
+        if 'archivo' not in request.files:
+            return jsonify({'success': False, 'message': 'No se seleccionó ningún archivo'})
+        
+        archivo = request.files['archivo']
+        
+        # Verificar si el archivo está vacío
+        if archivo.filename == '':
+            return jsonify({'success': False, 'message': 'No se seleccionó ningún archivo'})
+        
+        # Verificar extensión del archivo
+        if not archivo.filename.lower().endswith('.csv'):
+            return jsonify({'success': False, 'message': 'Solo se permiten archivos CSV'})
+        
+        # Crear backup del CSV actual
+        if os.path.exists('INVENTARIO PARA TRABAJO.csv'):
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_file = f"INVENTARIO PARA TRABAJO_backup_{timestamp}.csv"
+            os.rename('INVENTARIO PARA TRABAJO.csv', backup_file)
+        
+        # Guardar el nuevo archivo
+        archivo.save('INVENTARIO PARA TRABAJO.csv')
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Inventario CSV actualizado exitosamente'
+        })
+        
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'})
 
