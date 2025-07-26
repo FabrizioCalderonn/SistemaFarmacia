@@ -20,13 +20,13 @@ except ImportError:
 FARMACIAS = {
     'farmacia1': {
         'nombre': 'Farmacia Principal',
-        'direccion': 'Dirección 1',
-        'telefono': 'Teléfono 1'
+        'direccion': 'Av. Principal #123, Ciudad',
+        'telefono': '(555) 123-4567'
     },
     'farmacia2': {
         'nombre': 'Farmacia Sucursal',
-        'direccion': 'Dirección 2', 
-        'telefono': 'Teléfono 2'
+        'direccion': 'Calle Secundaria #456, Ciudad',
+        'telefono': '(555) 987-6543'
     }
 }
 
@@ -993,9 +993,17 @@ def actualizar_inventario_csv():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'})
 
-@app.route('/cambiar_farmacia')
+@app.route('/cambiar_farmacia', methods=['GET', 'POST'])
 def cambiar_farmacia():
     """Página para cambiar de farmacia"""
+    if request.method == 'POST':
+        farmacia = request.args.get('farmacia', FARMACIA_DEFAULT)
+        if farmacia in FARMACIAS:
+            # Aquí podrías guardar la farmacia en sesión o base de datos
+            return jsonify({'success': True, 'message': f'Farmacia cambiada a {FARMACIAS[farmacia]["nombre"]}'})
+        else:
+            return jsonify({'success': False, 'message': 'Farmacia no válida'})
+    
     farmacias = FARMACIAS
     farmacia_actual = get_farmacia_actual()
     return render_template('cambiar_farmacia.html', farmacias=farmacias, farmacia_actual=farmacia_actual)
