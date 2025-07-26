@@ -194,25 +194,34 @@ def parse_inventory_file():
                     # Dividir por tabulaciones y limpiar espacios extra
                     parts = [part.strip() for part in line.split('\t') if part.strip()]
                     
-                    if len(parts) >= 4:
+                    if len(parts) >= 3:  # Cambiado de 4 a 3
                         codigo = parts[0]
                         nombre = parts[1]
-                        modelo = parts[2]
-                        marca = parts[3]
+                        modelo_marca = parts[2]  # Modelo y marca están juntos
+                        
+                        # Extraer marca/laboratorio del tercer campo
+                        # Buscar la última coma para separar modelo de marca
+                        if ',' in modelo_marca:
+                            modelo, marca = modelo_marca.rsplit(',', 1)
+                            modelo = modelo.strip()
+                            marca = marca.strip()
+                        else:
+                            modelo = modelo_marca.strip()
+                            marca = 'Sin especificar'
                         
                         # Solo agregar si tiene código y nombre válidos (no solo espacios)
                         if codigo and nombre and len(codigo.strip()) > 3 and len(nombre.strip()) > 3:
                             productos.append({
                                 'codigo': codigo.strip(),
                                 'nombre': nombre.strip(),
-                                'modelo': modelo.strip(),
-                                'marca': marca.strip(),
-                                'laboratorio': marca.strip() if marca.strip() else 'Sin especificar'
+                                'modelo': modelo,
+                                'marca': marca,
+                                'laboratorio': marca if marca else 'Sin especificar'
                             })
                         else:
                             print(f"Línea descartada - código: '{codigo}', nombre: '{nombre}'")
                     else:
-                        print(f"Línea con menos de 4 partes: {parts}")
+                        print(f"Línea con menos de 3 partes: {parts}")
         
         print(f"Productos parseados: {len(productos)}")
         return productos
