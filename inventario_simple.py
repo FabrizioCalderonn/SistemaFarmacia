@@ -151,7 +151,10 @@ def get_medicamentos_by_laboratorio(laboratorio):
         cargar_inventario()
     
     medicamentos = []
-    for producto in INVENTARIO_MEMORIA:
+    print(f"Buscando medicamentos para laboratorio: '{laboratorio}'")
+    print(f"Total productos en memoria: {len(INVENTARIO_MEMORIA)}")
+    
+    for i, producto in enumerate(INVENTARIO_MEMORIA):
         if producto['laboratorio'] == laboratorio:
             medicamentos.append((
                 producto['nombre'],
@@ -159,7 +162,10 @@ def get_medicamentos_by_laboratorio(laboratorio):
                 producto['precio'],
                 producto['stock']
             ))
+            if len(medicamentos) <= 3:  # Debug: mostrar los primeros
+                print(f"Medicamento encontrado: {producto['nombre'][:30]}...")
     
+    print(f"Total medicamentos encontrados para '{laboratorio}': {len(medicamentos)}")
     return medicamentos
 
 def buscar_productos(termino):
@@ -169,7 +175,10 @@ def buscar_productos(termino):
     
     termino = termino.lower()
     productos = []
-    for producto in INVENTARIO_MEMORIA:
+    print(f"Buscando productos con término: '{termino}'")
+    print(f"Total productos en memoria: {len(INVENTARIO_MEMORIA)}")
+    
+    for i, producto in enumerate(INVENTARIO_MEMORIA):
         nombre = producto['nombre'].lower()
         if termino in nombre:
             productos.append({
@@ -179,7 +188,10 @@ def buscar_productos(termino):
                 'precio': producto['precio'],
                 'stock': producto['stock']
             })
+            if len(productos) <= 3:  # Debug: mostrar los primeros
+                print(f"Producto encontrado: {producto['nombre'][:30]}...")
     
+    print(f"Total productos encontrados con '{termino}': {len(productos)}")
     return productos
 
 def debug_inventario():

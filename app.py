@@ -959,6 +959,49 @@ def api_farmacia_actual():
         'info': get_farmacia_info(farmacia_actual)
     })
 
+@app.route('/debug/busqueda')
+def debug_busqueda():
+    """Debug específico para las funciones de búsqueda"""
+    try:
+        from inventario_simple import get_laboratorios, get_medicamentos_by_laboratorio, buscar_productos
+        
+        result = {
+            'laboratorios_disponibles': [],
+            'medicamentos_por_laboratorio': {},
+            'busqueda_ejemplo': {},
+            'error': None
+        }
+        
+        # Obtener laboratorios
+        try:
+            laboratorios = get_laboratorios()
+            result['laboratorios_disponibles'] = laboratorios
+            
+            # Probar obtener medicamentos para cada laboratorio
+            for lab in laboratorios[:3]:  # Solo los primeros 3
+                medicamentos = get_medicamentos_by_laboratorio(lab)
+                result['medicamentos_por_laboratorio'][lab] = {
+                    'total': len(medicamentos),
+                    'primeros_5': medicamentos[:5]
+                }
+        except Exception as e:
+            result['error_laboratorios'] = str(e)
+        
+        # Probar búsqueda
+        try:
+            busqueda_result = buscar_productos('MARSCHALL')
+            result['busqueda_ejemplo'] = {
+                'termino': 'MARSCHALL',
+                'total_encontrados': len(busqueda_result),
+                'primeros_3': busqueda_result[:3]
+            }
+        except Exception as e:
+            result['error_busqueda'] = str(e)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 @app.route('/debug/inventario')
 def debug_inventario():
     """Debug específico para el módulo de inventario simple"""
