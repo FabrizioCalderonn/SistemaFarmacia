@@ -234,15 +234,9 @@ def parse_inventory_file():
 def get_laboratorios():
     """Obtener lista de laboratorios únicos desde archivo de inventario"""
     try:
-        productos = parse_inventory_file()
-        laboratorios = set()
-        
-        for producto in productos:
-            if producto['laboratorio'] and producto['laboratorio'] != 'Sin especificar':
-                laboratorios.add(producto['laboratorio'])
-        
-        print(f"Laboratorios encontrados: {len(laboratorios)}")
-        return sorted(list(laboratorios))
+        # Usar el módulo simple
+        from inventario_simple import get_laboratorios as get_labs
+        return get_labs()
     except Exception as e:
         print(f"Error al obtener laboratorios: {e}")
         import traceback
@@ -252,19 +246,9 @@ def get_laboratorios():
 def get_medicamentos_by_laboratorio(laboratorio):
     """Obtener medicamentos por laboratorio desde archivo de inventario"""
     try:
-        productos = parse_inventory_file()
-        medicamentos = []
-        
-        for producto in productos:
-            if producto['laboratorio'] == laboratorio:
-                medicamentos.append((
-                    producto['nombre'],
-                    producto['modelo'],
-                    0.0,  # precio por defecto
-                    1     # stock por defecto
-                ))
-        
-        return medicamentos
+        # Usar el módulo simple
+        from inventario_simple import get_medicamentos_by_laboratorio as get_meds
+        return get_meds(laboratorio)
     except Exception as e:
         print(f"Error al obtener medicamentos: {e}")
         return []
