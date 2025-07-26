@@ -85,48 +85,41 @@ def cargar_inventario():
                 continue
             
             if header_found and line and not line.startswith('"Listado') and not line.startswith('"Reportes'):
-                line = line.replace('"', '')
-                parts = [part.strip() for part in line.split('\t') if part.strip()]
+                # Usar CSV reader para manejar comillas correctamente
+                import csv
+                from io import StringIO
                 
-                if len(parts) >= 3:
-                    codigo = parts[0]
-                    nombre = parts[1]
-                    modelo_marca = parts[2]
+                # Crear un StringIO con la línea para usar csv.reader
+                line_io = StringIO(line)
+                reader = csv.reader(line_io)
+                
+                try:
+                    parts = next(reader)  # Leer la línea como CSV
                     
-                    # Limpiar campos de comillas y espacios extra
-                    codigo = codigo.strip().strip('"')
-                    nombre = nombre.strip().strip('"')
-                    modelo_marca = modelo_marca.strip().strip('"')
-                    
-                    # Extraer modelo y laboratorio del tercer campo
-                    if ',' in modelo_marca:
-                        # Buscar la última coma para separar modelo de laboratorio
-                        partes_modelo = modelo_marca.split(',')
-                        if len(partes_modelo) >= 2:
-                            modelo = ','.join(partes_modelo[:-1]).strip()  # Todo excepto el último
-                            laboratorio = partes_modelo[-1].strip()  # El último
-                        else:
-                            modelo = modelo_marca
-                            laboratorio = 'Sin especificar'
-                    else:
-                        modelo = modelo_marca
-                        laboratorio = 'Sin especificar'
-                    
-                    # Solo agregar si tiene código y nombre válidos
-                    if codigo and nombre and len(codigo) > 3 and len(nombre) > 3:
-                        producto = {
-                            'codigo': codigo,
-                            'nombre': nombre,
-                            'modelo': modelo,
-                            'laboratorio': laboratorio,
-                            'precio': 0.0,
-                            'stock': 1
-                        }
-                        INVENTARIO_MEMORIA.append(producto)
+                    if len(parts) >= 4:  # Código, Nombre, Modelo, Laboratorio
+                        codigo = parts[0].strip()
+                        nombre = parts[1].strip()
+                        modelo = parts[2].strip()
+                        laboratorio = parts[3].strip()
                         
-                        # Debug: mostrar los primeros productos
-                        if len(INVENTARIO_MEMORIA) <= 3:
-                            print(f"Producto cargado: {producto['nombre'][:30]}... -> Lab: {producto['laboratorio']}")
+                        # Solo agregar si tiene código y nombre válidos
+                        if codigo and nombre and len(codigo) > 3 and len(nombre) > 3:
+                            producto = {
+                                'codigo': codigo,
+                                'nombre': nombre,
+                                'modelo': modelo,
+                                'laboratorio': laboratorio,
+                                'precio': 0.0,
+                                'stock': 1
+                            }
+                            INVENTARIO_MEMORIA.append(producto)
+                            
+                            # Debug: mostrar los primeros productos
+                            if len(INVENTARIO_MEMORIA) <= 3:
+                                print(f"Producto cargado: {producto['nombre'][:30]}... -> Lab: {producto['laboratorio']}")
+                except Exception as e:
+                    print(f"Error procesando línea: {e}")
+                    continue
         
         print(f"Inventario cargado: {len(INVENTARIO_MEMORIA)} productos")
         return True
