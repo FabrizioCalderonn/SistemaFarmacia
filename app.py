@@ -19,12 +19,12 @@ except ImportError:
 # Configuración de farmacias
 FARMACIAS = {
     'farmacia1': {
-        'nombre': 'Farmacia Principal',
+        'nombre': 'Farmacia Popular',
         'direccion': 'Av. Principal #123, Ciudad',
         'telefono': '(555) 123-4567'
     },
     'farmacia2': {
-        'nombre': 'Farmacia Sucursal',
+        'nombre': 'Farmacia El Angel',
         'direccion': 'Calle Secundaria #456, Ciudad',
         'telefono': '(555) 987-6543'
     }
