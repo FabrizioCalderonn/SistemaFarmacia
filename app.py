@@ -176,18 +176,30 @@ def parse_inventory_file():
         with open(csv_path, 'r', encoding='utf-8-sig') as file:
             lines = file.readlines()
             
+            # Buscar la línea de encabezados
+            header_found = False
             for line in lines:
                 line = line.strip()
-                if line and not line.startswith('"Listado') and not line.startswith('"Reportes') and not line.startswith('"Codigo'):
+                
+                # Detectar línea de encabezados
+                if 'Codigo' in line and 'Nombre' in line and 'Modelo' in line and 'Marca' in line:
+                    header_found = True
+                    continue
+                
+                # Procesar líneas de datos después de encontrar encabezados
+                if header_found and line and not line.startswith('"Listado') and not line.startswith('"Reportes'):
+                    # Limpiar la línea de comillas extra
+                    line = line.replace('"', '')
                     parts = line.split('\t')
+                    
                     if len(parts) >= 4:
-                        # Limpiar y procesar cada parte
-                        codigo = parts[0].strip().strip('"') if len(parts) > 0 else ''
-                        nombre = parts[1].strip().strip('"') if len(parts) > 1 else ''
-                        modelo = parts[2].strip().strip('"') if len(parts) > 2 else ''
-                        marca = parts[3].strip().strip('"') if len(parts) > 3 else ''
+                        codigo = parts[0].strip()
+                        nombre = parts[1].strip()
+                        modelo = parts[2].strip()
+                        marca = parts[3].strip()
                         
-                        if codigo and nombre:
+                        # Solo agregar si tiene código y nombre válidos
+                        if codigo and nombre and len(codigo) > 3 and len(nombre) > 3:
                             productos.append({
                                 'codigo': codigo,
                                 'nombre': nombre,
@@ -196,9 +208,12 @@ def parse_inventory_file():
                                 'laboratorio': marca if marca else 'Sin especificar'
                             })
         
+        print(f"Productos parseados: {len(productos)}")
         return productos
     except Exception as e:
         print(f"Error al parsear inventario: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 def get_laboratorios():
@@ -956,47 +971,36 @@ def debug_csv():
             'archivos_en_directorio': os.listdir('.'),
             'tamaño_archivo': 0,
             'laboratorios': [],
+            'productos_parseados': 0,
             'error': None
         }
         
         if os.path.exists(csv_path):
             result['tamaño_archivo'] = os.path.getsize(csv_path)
+            
+            # Usar la nueva función de parsing
+            productos = parse_inventory_file()
+            result['productos_parseados'] = len(productos)
+            
+            # Extraer laboratorios únicos
+            laboratorios = set()
+            for producto in productos:
+                if producto['laboratorio'] and producto['laboratorio'] != 'Sin especificar':
+                    laboratorios.add(producto['laboratorio'])
+            
+            result['laboratorios'] = sorted(list(laboratorios))
+            
+            # Mostrar algunos productos de ejemplo
+            if productos:
+                result['ejemplo_productos'] = productos[:3]
+            
+            # También mostrar las primeras líneas del archivo
             try:
-                # Probar diferentes encodings
-                encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
-                for encoding in encodings:
-                    try:
-                        with open(csv_path, 'r', encoding=encoding) as file:
-                            # Leer las primeras líneas para debug
-                            first_lines = [file.readline() for _ in range(5)]
-                            result[f'primeras_lineas_{encoding}'] = first_lines
-                            
-                            # Volver al inicio del archivo
-                            file.seek(0)
-                            reader = csv.DictReader(file)
-                            
-                            # Mostrar las columnas disponibles
-                            result['columnas'] = reader.fieldnames
-                            
-                            laboratorios = set()
-                            row_count = 0
-                            for row in reader:
-                                row_count += 1
-                                if row.get('laboratorio'):
-                                    laboratorios.add(row['laboratorio'])
-                                if row_count <= 3:  # Mostrar primeras 3 filas
-                                    result[f'fila_{row_count}'] = row
-                            
-                            result['total_filas'] = row_count
-                            result['laboratorios'] = sorted(list(laboratorios))
-                            result['encoding_exitoso'] = encoding
-                            break
-                    except Exception as e:
-                        result[f'error_{encoding}'] = str(e)
-                        continue
-                        
+                with open(csv_path, 'r', encoding='utf-8-sig') as file:
+                    first_lines = [file.readline() for _ in range(10)]
+                    result['primeras_lineas'] = first_lines
             except Exception as e:
-                result['error'] = str(e)
+                result['error_lectura'] = str(e)
         
         return jsonify(result)
     except Exception as e:
