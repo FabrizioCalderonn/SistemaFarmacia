@@ -963,13 +963,14 @@ def api_farmacia_actual():
 def debug_inventario():
     """Debug específico para el módulo de inventario simple"""
     try:
-        from inventario_simple import cargar_inventario, get_laboratorios, get_estadisticas
+        from inventario_simple import cargar_inventario, get_laboratorios, get_estadisticas, debug_inventario as debug_inv
         
         result = {
             'modulo_cargado': True,
             'inventario_cargado': False,
             'laboratorios': [],
             'estadisticas': {},
+            'debug_detallado': {},
             'error': None
         }
         
@@ -991,6 +992,12 @@ def debug_inventario():
             result['estadisticas'] = get_estadisticas()
         except Exception as e:
             result['error_estadisticas'] = str(e)
+        
+        # Debug detallado
+        try:
+            result['debug_detallado'] = debug_inv()
+        except Exception as e:
+            result['error_debug'] = str(e)
         
         return jsonify(result)
     except Exception as e:

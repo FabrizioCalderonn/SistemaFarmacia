@@ -46,14 +46,19 @@ def cargar_inventario():
                         laboratorio = 'Sin especificar'
                     
                     if codigo and nombre and len(codigo.strip()) > 3 and len(nombre.strip()) > 3:
-                        INVENTARIO_MEMORIA.append({
+                        producto = {
                             'codigo': codigo.strip(),
                             'nombre': nombre.strip(),
                             'modelo': modelo,
                             'laboratorio': laboratorio,
                             'precio': 0.0,
                             'stock': 1
-                        })
+                        }
+                        INVENTARIO_MEMORIA.append(producto)
+                        
+                        # Debug: mostrar los primeros productos
+                        if len(INVENTARIO_MEMORIA) <= 3:
+                            print(f"Producto cargado: {producto['nombre'][:30]}... -> Lab: {producto['laboratorio']}")
         
         print(f"Inventario cargado: {len(INVENTARIO_MEMORIA)} productos")
         return True
@@ -68,10 +73,15 @@ def get_laboratorios():
         cargar_inventario()
     
     laboratorios = set()
-    for producto in INVENTARIO_MEMORIA:
+    print(f"Analizando {len(INVENTARIO_MEMORIA)} productos para laboratorios...")
+    
+    for i, producto in enumerate(INVENTARIO_MEMORIA):
         if producto['laboratorio'] and producto['laboratorio'] != 'Sin especificar':
             laboratorios.add(producto['laboratorio'])
+            if i < 5:  # Mostrar los primeros 5 para debug
+                print(f"Producto {i+1}: {producto['nombre'][:30]}... -> Laboratorio: {producto['laboratorio']}")
     
+    print(f"Laboratorios encontrados: {sorted(list(laboratorios))}")
     return sorted(list(laboratorios))
 
 def get_medicamentos_by_laboratorio(laboratorio):
@@ -110,6 +120,37 @@ def buscar_productos(termino):
             })
     
     return productos
+
+def debug_inventario():
+    """Función de debug para mostrar información del inventario"""
+    if not INVENTARIO_MEMORIA:
+        cargar_inventario()
+    
+    debug_info = {
+        'total_productos': len(INVENTARIO_MEMORIA),
+        'primeros_productos': [],
+        'laboratorios_unicos': set(),
+        'laboratorios_conteo': {}
+    }
+    
+    for i, producto in enumerate(INVENTARIO_MEMORIA):
+        # Contar laboratorios
+        lab = producto['laboratorio']
+        if lab and lab != 'Sin especificar':
+            debug_info['laboratorios_unicos'].add(lab)
+            debug_info['laboratorios_conteo'][lab] = debug_info['laboratorios_conteo'].get(lab, 0) + 1
+        
+        # Mostrar primeros productos
+        if i < 5:
+            debug_info['primeros_productos'].append({
+                'codigo': producto['codigo'],
+                'nombre': producto['nombre'][:50],
+                'laboratorio': producto['laboratorio']
+            })
+    
+    debug_info['laboratorios_unicos'] = sorted(list(debug_info['laboratorios_unicos']))
+    
+    return debug_info
 
 def get_estadisticas():
     """Obtener estadísticas del inventario"""
