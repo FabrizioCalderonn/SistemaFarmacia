@@ -15,6 +15,7 @@ Sistema web para gestión de inventario y ventas de farmacia.
    - Selecciona "Deploy from GitHub repo"
    - Conecta tu repositorio
 
+
 3. **Configurar base de datos**
    - En tu proyecto, click en "New"
    - Selecciona "Database" → "PostgreSQL"
