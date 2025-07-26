@@ -41,10 +41,6 @@ if DATABASE_TYPE == 'postgresql':
     DATABASE_URL = os.environ.get('DATABASE_URL')
     if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    
-    # Agregar connection pooling para Supabase
-    if DATABASE_URL and 'supabase.co' in DATABASE_URL and '?pgbouncer=true' not in DATABASE_URL:
-        DATABASE_URL += '?pgbouncer=true'
 else:
     # Configuración para SQLite (local)
     DATABASE = 'farmacia.db'
