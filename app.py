@@ -384,6 +384,12 @@ def api_buscar():
         ])
     
     print(f"Productos formateados: {productos_formateados}")
+    print(f"Total productos formateados: {len(productos_formateados)}")
+    
+    # Verificar que no esté vacío
+    if not productos_formateados:
+        print("ADVERTENCIA: productos_formateados está vacío!")
+    
     return jsonify(productos_formateados)
 
 @app.route('/guardar_registro', methods=['POST'])
