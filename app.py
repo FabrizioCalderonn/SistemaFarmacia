@@ -369,7 +369,17 @@ def api_buscar():
         return jsonify([])
     
     productos = buscar_productos(termino)
-    return jsonify(productos)
+    
+    # Convertir al formato esperado por el frontend: [laboratorio, medicamento, presentacion]
+    productos_formateados = []
+    for producto in productos:
+        productos_formateados.append([
+            producto['laboratorio'],
+            producto['medicamento'],
+            producto['presentacion']
+        ])
+    
+    return jsonify(productos_formateados)
 
 @app.route('/guardar_registro', methods=['POST'])
 def guardar_registro():
