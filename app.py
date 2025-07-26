@@ -959,6 +959,46 @@ def api_farmacia_actual():
         'info': get_farmacia_info(farmacia_actual)
     })
 
+@app.route('/debug/inventario')
+def debug_inventario():
+    """Debug específico para el módulo de inventario simple"""
+    try:
+        from inventario_simple import cargar_inventario, get_laboratorios, get_estadisticas
+        
+        result = {
+            'modulo_cargado': True,
+            'inventario_cargado': False,
+            'laboratorios': [],
+            'estadisticas': {},
+            'error': None
+        }
+        
+        # Intentar cargar inventario
+        try:
+            cargar_inventario()
+            result['inventario_cargado'] = True
+        except Exception as e:
+            result['error_carga'] = str(e)
+        
+        # Obtener laboratorios
+        try:
+            result['laboratorios'] = get_laboratorios()
+        except Exception as e:
+            result['error_laboratorios'] = str(e)
+        
+        # Obtener estadísticas
+        try:
+            result['estadisticas'] = get_estadisticas()
+        except Exception as e:
+            result['error_estadisticas'] = str(e)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            'modulo_cargado': False,
+            'error': str(e)
+        })
+
 @app.route('/debug/analyze')
 def debug_analyze():
     """Analizar el archivo línea por línea para debug"""
