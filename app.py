@@ -188,24 +188,25 @@ def parse_inventory_file():
                 
                 # Procesar líneas de datos después de encontrar encabezados
                 if header_found and line and not line.startswith('"Listado') and not line.startswith('"Reportes'):
-                    # Limpiar la línea de comillas extra
+                    # Limpiar la línea de comillas extra y espacios
                     line = line.replace('"', '')
-                    parts = line.split('\t')
+                    # Dividir por tabulaciones y limpiar espacios extra
+                    parts = [part.strip() for part in line.split('\t') if part.strip()]
                     
                     if len(parts) >= 4:
-                        codigo = parts[0].strip()
-                        nombre = parts[1].strip()
-                        modelo = parts[2].strip()
-                        marca = parts[3].strip()
+                        codigo = parts[0]
+                        nombre = parts[1]
+                        modelo = parts[2]
+                        marca = parts[3]
                         
-                        # Solo agregar si tiene código y nombre válidos
-                        if codigo and nombre and len(codigo) > 3 and len(nombre) > 3:
+                        # Solo agregar si tiene código y nombre válidos (no solo espacios)
+                        if codigo and nombre and len(codigo.strip()) > 3 and len(nombre.strip()) > 3:
                             productos.append({
-                                'codigo': codigo,
-                                'nombre': nombre,
-                                'modelo': modelo,
-                                'marca': marca,
-                                'laboratorio': marca if marca else 'Sin especificar'
+                                'codigo': codigo.strip(),
+                                'nombre': nombre.strip(),
+                                'modelo': modelo.strip(),
+                                'marca': marca.strip(),
+                                'laboratorio': marca.strip() if marca.strip() else 'Sin especificar'
                             })
         
         print(f"Productos parseados: {len(productos)}")
