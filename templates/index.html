@@ -438,24 +438,38 @@
             const laboratorio = this.value;
             const medicamentoSelect = document.getElementById('medicamento');
             
+            console.log('Laboratorio seleccionado:', laboratorio);
+            
             if (laboratorio) {
-                fetch(`/api/medicamentos/${encodeURIComponent(laboratorio)}`)
-                    .then(response => response.json())
+                const url = `/api/medicamentos/${encodeURIComponent(laboratorio)}`;
+                console.log('Haciendo fetch a:', url);
+                
+                fetch(url)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Datos recibidos:', data);
                         medicamentoSelect.innerHTML = '<option value="">Seleccione un medicamento</option>';
                         
-                        data.forEach(med => {
-                            const option = document.createElement('option');
-                            option.value = med[0]; // medicamento
-                            option.textContent = `${med[0]} - ${med[1]}`; // medicamento - presentacion
-                            option.dataset.stock = med[3];
-                            medicamentoSelect.appendChild(option);
-                        });
+                        if (Array.isArray(data)) {
+                            data.forEach(med => {
+                                const option = document.createElement('option');
+                                option.value = med[0]; // medicamento
+                                option.textContent = `${med[0]} - ${med[1]}`; // medicamento - presentacion
+                                option.dataset.stock = med[3];
+                                medicamentoSelect.appendChild(option);
+                            });
+                        } else {
+                            console.error('Datos no son un array:', data);
+                        }
                         
                         medicamentoSelect.disabled = false;
+                        console.log('Medicamentos cargados:', medicamentoSelect.options.length - 1);
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Error al cargar medicamentos:', error);
                         showAlert('Error al cargar medicamentos', 'error');
                     });
             } else {
@@ -472,15 +486,24 @@
             clearTimeout(searchTimeout);
             const termino = this.value.trim();
             
+            console.log('Búsqueda iniciada:', termino);
+            
             if (termino.length < 2) {
                 document.getElementById('searchResults').style.display = 'none';
                 return;
             }
             
             searchTimeout = setTimeout(() => {
-                fetch(`/api/buscar?q=${encodeURIComponent(termino)}`)
-                    .then(response => response.json())
+                const url = `/api/buscar?q=${encodeURIComponent(termino)}`;
+                console.log('Haciendo búsqueda a:', url);
+                
+                fetch(url)
+                    .then(response => {
+                        console.log('Búsqueda response status:', response.status);
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Resultados de búsqueda:', data);
                         const resultsContainer = document.getElementById('searchResults');
                         resultsContainer.innerHTML = '';
                         
@@ -497,6 +520,7 @@
                                     </div>
                                 `;
                                 item.addEventListener('click', () => {
+                                    console.log('Producto seleccionado:', producto);
                                     // Llenar automáticamente el formulario
                                     document.getElementById('laboratorio').value = producto[0];
                                     document.getElementById('laboratorio').dispatchEvent(new Event('change'));
