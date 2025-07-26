@@ -168,19 +168,31 @@ def procesar_excel_web(archivo):
 def get_laboratorios():
     """Obtener lista de laboratorios únicos desde CSV"""
     try:
-        if not os.path.exists('INVENTARIO PARA TRABAJO.csv'):
+        csv_path = 'INVENTARIO PARA TRABAJO.csv'
+        print(f"Buscando archivo CSV en: {os.path.abspath(csv_path)}")
+        
+        if not os.path.exists(csv_path):
+            print(f"Archivo CSV no encontrado: {csv_path}")
+            # Listar archivos en el directorio actual
+            files = os.listdir('.')
+            print(f"Archivos disponibles: {files}")
             return []
         
+        print(f"Archivo CSV encontrado, tamaño: {os.path.getsize(csv_path)} bytes")
+        
         laboratorios = set()
-        with open('INVENTARIO PARA TRABAJO.csv', 'r', encoding='utf-8') as file:
+        with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 if row.get('laboratorio'):
                     laboratorios.add(row['laboratorio'])
         
+        print(f"Laboratorios encontrados: {len(laboratorios)}")
         return sorted(list(laboratorios))
     except Exception as e:
         print(f"Error al obtener laboratorios: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 def get_medicamentos_by_laboratorio(laboratorio):
@@ -911,6 +923,37 @@ def api_farmacia_actual():
         'farmacia': farmacia_actual,
         'info': get_farmacia_info(farmacia_actual)
     })
+
+@app.route('/debug/csv')
+def debug_csv():
+    """Ruta de debug para verificar el archivo CSV"""
+    try:
+        csv_path = 'INVENTARIO PARA TRABAJO.csv'
+        result = {
+            'archivo_existe': os.path.exists(csv_path),
+            'ruta_absoluta': os.path.abspath(csv_path),
+            'archivos_en_directorio': os.listdir('.'),
+            'tamaño_archivo': 0,
+            'laboratorios': [],
+            'error': None
+        }
+        
+        if os.path.exists(csv_path):
+            result['tamaño_archivo'] = os.path.getsize(csv_path)
+            try:
+                with open(csv_path, 'r', encoding='utf-8') as file:
+                    reader = csv.DictReader(file)
+                    laboratorios = set()
+                    for row in reader:
+                        if row.get('laboratorio'):
+                            laboratorios.add(row['laboratorio'])
+                    result['laboratorios'] = sorted(list(laboratorios))
+            except Exception as e:
+                result['error'] = str(e)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 # Para Vercel
 app.debug = False
