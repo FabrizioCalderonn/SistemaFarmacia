@@ -178,12 +178,13 @@ def parse_inventory_file():
             
             # Buscar la línea de encabezados
             header_found = False
-            for line in lines:
+            for i, line in enumerate(lines):
                 line = line.strip()
                 
-                # Detectar línea de encabezados
-                if 'Codigo' in line and 'Nombre' in line and 'Modelo' in line and 'Marca' in line:
+                # Detectar línea de encabezados (más flexible)
+                if 'Codigo' in line and 'Nombre' in line:
                     header_found = True
+                    print(f"Encabezados encontrados en línea {i+1}: {line}")
                     continue
                 
                 # Procesar líneas de datos después de encontrar encabezados
@@ -208,6 +209,10 @@ def parse_inventory_file():
                                 'marca': marca.strip(),
                                 'laboratorio': marca.strip() if marca.strip() else 'Sin especificar'
                             })
+                        else:
+                            print(f"Línea descartada - código: '{codigo}', nombre: '{nombre}'")
+                    else:
+                        print(f"Línea con menos de 4 partes: {parts}")
         
         print(f"Productos parseados: {len(productos)}")
         return productos
@@ -960,6 +965,37 @@ def api_farmacia_actual():
         'farmacia': farmacia_actual,
         'info': get_farmacia_info(farmacia_actual)
     })
+
+@app.route('/debug/analyze')
+def debug_analyze():
+    """Analizar el archivo línea por línea para debug"""
+    try:
+        csv_path = 'INVENTARIO PARA TRABAJO.csv'
+        result = {
+            'archivo_existe': os.path.exists(csv_path),
+            'analisis_lineas': []
+        }
+        
+        if os.path.exists(csv_path):
+            with open(csv_path, 'r', encoding='utf-8-sig') as file:
+                lines = file.readlines()
+                
+                for i, line in enumerate(lines[:20]):  # Solo las primeras 20 líneas
+                    line_clean = line.strip()
+                    if line_clean:
+                        parts = [part.strip() for part in line_clean.split('\t') if part.strip()]
+                        result['analisis_lineas'].append({
+                            'numero': i + 1,
+                            'linea_original': line_clean,
+                            'partes': parts,
+                            'num_partes': len(parts),
+                            'tiene_codigo': 'Codigo' in line_clean,
+                            'tiene_nombre': 'Nombre' in line_clean
+                        })
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/debug/csv')
 def debug_csv():
