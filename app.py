@@ -941,13 +941,39 @@ def debug_csv():
         if os.path.exists(csv_path):
             result['tamaño_archivo'] = os.path.getsize(csv_path)
             try:
-                with open(csv_path, 'r', encoding='utf-8') as file:
-                    reader = csv.DictReader(file)
-                    laboratorios = set()
-                    for row in reader:
-                        if row.get('laboratorio'):
-                            laboratorios.add(row['laboratorio'])
-                    result['laboratorios'] = sorted(list(laboratorios))
+                # Probar diferentes encodings
+                encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+                for encoding in encodings:
+                    try:
+                        with open(csv_path, 'r', encoding=encoding) as file:
+                            # Leer las primeras líneas para debug
+                            first_lines = [file.readline() for _ in range(5)]
+                            result[f'primeras_lineas_{encoding}'] = first_lines
+                            
+                            # Volver al inicio del archivo
+                            file.seek(0)
+                            reader = csv.DictReader(file)
+                            
+                            # Mostrar las columnas disponibles
+                            result['columnas'] = reader.fieldnames
+                            
+                            laboratorios = set()
+                            row_count = 0
+                            for row in reader:
+                                row_count += 1
+                                if row.get('laboratorio'):
+                                    laboratorios.add(row['laboratorio'])
+                                if row_count <= 3:  # Mostrar primeras 3 filas
+                                    result[f'fila_{row_count}'] = row
+                            
+                            result['total_filas'] = row_count
+                            result['laboratorios'] = sorted(list(laboratorios))
+                            result['encoding_exitoso'] = encoding
+                            break
+                    except Exception as e:
+                        result[f'error_{encoding}'] = str(e)
+                        continue
+                        
             except Exception as e:
                 result['error'] = str(e)
         
