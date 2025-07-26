@@ -52,6 +52,18 @@
             margin: 5px 0 0 0;
         }
 
+        .farmacia-actual-info {
+            margin-top: 10px;
+        }
+
+        .farmacia-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -293,7 +305,12 @@
     <div class="container">
         <div class="header">
             <h1>🏥 Registro de Compras</h1>
-            <p></p>
+            <p>Gestión de inventario y ventas</p>
+            <div class="farmacia-actual-info">
+                <span class="farmacia-badge">
+                    📍 {{ farmacia_info.nombre }}
+                </span>
+            </div>
         </div>
 
         <!--<div class="stats-container">

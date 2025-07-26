@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, session
 import os
 from datetime import datetime
 import tempfile
@@ -34,6 +34,7 @@ FARMACIAS = {
 FARMACIA_DEFAULT = 'farmacia1'
 
 app = Flask(__name__)
+app.secret_key = 'tu_clave_secreta_aqui_12345'  # Necesario para las sesiones
 
 # Configuración de la base de datos
 if DATABASE_TYPE == 'postgresql':
@@ -326,11 +327,8 @@ def get_estadisticas():
         }
 
 def get_farmacia_actual():
-    """Obtener la farmacia actual desde la sesión o parámetros"""
-    farmacia = request.args.get('farmacia', FARMACIA_DEFAULT)
-    if farmacia not in FARMACIAS:
-        farmacia = FARMACIA_DEFAULT
-    return farmacia
+    """Obtener la farmacia actual desde la sesión o por defecto"""
+    return session.get('farmacia_actual', FARMACIA_DEFAULT)
 
 def get_farmacia_info(farmacia_id):
     """Obtener información de una farmacia específica"""
@@ -347,7 +345,14 @@ def index():
     
     laboratorios = get_laboratorios()
     estadisticas = get_estadisticas()
-    return render_template('index.html', laboratorios=laboratorios, estadisticas=estadisticas)
+    farmacia_actual = get_farmacia_actual()
+    farmacia_info = get_farmacia_info(farmacia_actual)
+    
+    return render_template('index.html', 
+                         laboratorios=laboratorios, 
+                         estadisticas=estadisticas,
+                         farmacia_actual=farmacia_actual,
+                         farmacia_info=farmacia_info)
 
 @app.route('/api/laboratorios')
 def api_laboratorios():
@@ -518,14 +523,17 @@ def api_registros():
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # Obtener farmacia actual
+        farmacia_actual = get_farmacia_actual()
+        
         # Construir consulta con filtros
         query = '''
             SELECT id, laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
                    fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica
             FROM registros 
-            WHERE 1=1
+            WHERE farmacia = %s
         '''
-        params = []
+        params = [farmacia_actual]
         
         if fecha_inicio:
             query += ' AND fecha_ingreso >= %s'
@@ -734,6 +742,9 @@ def eliminar_registro(registro_id):
 def exportar_excel():
     """Exportar registros a Excel"""
     try:
+        # Obtener farmacia actual
+        farmacia_actual = get_farmacia_actual()
+        
         # Obtener registros
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -742,15 +753,17 @@ def exportar_excel():
                 SELECT laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
                        fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica
                 FROM registros 
+                WHERE farmacia = %s
                 ORDER BY fecha_ingreso DESC
-            ''')
+            ''', (farmacia_actual,))
         else:
             cursor.execute('''
                 SELECT laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
                        fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica
                 FROM registros 
+                WHERE farmacia = ?
                 ORDER BY fecha_ingreso DESC
-            ''')
+            ''', (farmacia_actual,))
         registros = cursor.fetchall()
         conn.close()
         
@@ -999,7 +1012,8 @@ def cambiar_farmacia():
     if request.method == 'POST':
         farmacia = request.args.get('farmacia', FARMACIA_DEFAULT)
         if farmacia in FARMACIAS:
-            # Aquí podrías guardar la farmacia en sesión o base de datos
+            # Guardar la farmacia en la sesión
+            session['farmacia_actual'] = farmacia
             return jsonify({'success': True, 'message': f'Farmacia cambiada a {FARMACIAS[farmacia]["nombre"]}'})
         else:
             return jsonify({'success': False, 'message': 'Farmacia no válida'})
