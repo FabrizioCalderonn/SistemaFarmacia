@@ -494,7 +494,7 @@
             }
             
             searchTimeout = setTimeout(() => {
-                const url = `/api/buscar?q=${encodeURIComponent(termino)}`;
+                const url = `/api/buscar_simple?q=${encodeURIComponent(termino)}`;
                 console.log('Haciendo búsqueda a:', url);
                 
                 fetch(url)
