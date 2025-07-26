@@ -37,18 +37,30 @@ def cargar_inventario():
                     nombre = parts[1]
                     modelo_marca = parts[2]
                     
+                    # Limpiar campos de comillas y espacios extra
+                    codigo = codigo.strip().strip('"')
+                    nombre = nombre.strip().strip('"')
+                    modelo_marca = modelo_marca.strip().strip('"')
+                    
+                    # Extraer modelo y laboratorio del tercer campo
                     if ',' in modelo_marca:
-                        modelo, laboratorio = modelo_marca.rsplit(',', 1)
-                        modelo = modelo.strip()
-                        laboratorio = laboratorio.strip()
+                        # Buscar la última coma para separar modelo de laboratorio
+                        partes_modelo = modelo_marca.split(',')
+                        if len(partes_modelo) >= 2:
+                            modelo = ','.join(partes_modelo[:-1]).strip()  # Todo excepto el último
+                            laboratorio = partes_modelo[-1].strip()  # El último
+                        else:
+                            modelo = modelo_marca
+                            laboratorio = 'Sin especificar'
                     else:
-                        modelo = modelo_marca.strip()
+                        modelo = modelo_marca
                         laboratorio = 'Sin especificar'
                     
-                    if codigo and nombre and len(codigo.strip()) > 3 and len(nombre.strip()) > 3:
+                    # Solo agregar si tiene código y nombre válidos
+                    if codigo and nombre and len(codigo) > 3 and len(nombre) > 3:
                         producto = {
-                            'codigo': codigo.strip(),
-                            'nombre': nombre.strip(),
+                            'codigo': codigo,
+                            'nombre': nombre,
                             'modelo': modelo,
                             'laboratorio': laboratorio,
                             'precio': 0.0,
