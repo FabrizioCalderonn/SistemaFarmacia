@@ -42,10 +42,14 @@ app = Flask(__name__)
 
 # Configuración de la base de datos
 if DATABASE_TYPE == 'postgresql':
-    # Configuración para PostgreSQL (Railway/Render/Heroku)
+    # Configuración para PostgreSQL (Supabase)
     DATABASE_URL = os.environ.get('DATABASE_URL')
     if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    
+    # Agregar connection pooling para Supabase
+    if DATABASE_URL and 'supabase.co' in DATABASE_URL and '?pgbouncer=true' not in DATABASE_URL:
+        DATABASE_URL += '?pgbouncer=true'
 else:
     # Configuración para SQLite (local)
     DATABASE = 'farmacia.db'
@@ -55,7 +59,16 @@ def get_db_connection():
     if DATABASE_TYPE == 'postgresql':
         if not DATABASE_URL:
             raise Exception("DATABASE_URL no configurada")
-        return psycopg2.connect(DATABASE_URL)
+        try:
+            # Configurar timeout y reintentos
+            return psycopg2.connect(
+                DATABASE_URL,
+                connect_timeout=10,
+                options='-c statement_timeout=30000'
+            )
+        except Exception as e:
+            print(f"Error de conexión a PostgreSQL: {e}")
+            raise
     else:
         return sqlite3.connect(DATABASE)
 
@@ -291,6 +304,9 @@ init_db()
 @app.route('/')
 def index():
     """Página principal"""
+    # Inicializar base de datos si es necesario
+    initialize_database()
+    
     laboratorios = get_laboratorios()
     estadisticas = get_estadisticas()
     return render_template('index.html', laboratorios=laboratorios, estadisticas=estadisticas)
@@ -905,12 +921,16 @@ def api_farmacia_actual():
         'info': get_farmacia_info(farmacia_actual)
     })
 
-# Inicializar la base de datos al arrancar la aplicación
-try:
-    init_db()
-    print("Base de datos inicializada correctamente")
-except Exception as e:
-    print(f"Error al inicializar la base de datos: {e}")
-
 # Para Vercel
-app.debug = False 
+app.debug = False
+
+# Inicializar base de datos solo cuando sea necesario
+def initialize_database():
+    """Inicializar la base de datos solo cuando sea necesario"""
+    try:
+        init_db()
+        print("Base de datos inicializada correctamente")
+        return True
+    except Exception as e:
+        print(f"Error al inicializar la base de datos: {e}")
+        return False 
