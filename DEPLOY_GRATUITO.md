@@ -65,6 +65,8 @@ En Vercel → Tu proyecto → Settings → Environment Variables:
 
 ---
 
+
+
 ## 🚀 **Paso 3: Configurar el código**
 
 ### 1. Actualizar requirements.txt
