@@ -7,6 +7,62 @@ import os
 # Inventario en memoria (se carga al iniciar)
 INVENTARIO_MEMORIA = []
 
+def analizar_formato_linea():
+    """Analizar el formato exacto de las líneas del archivo"""
+    try:
+        csv_path = 'INVENTARIO PARA TRABAJO.csv'
+        if not os.path.exists(csv_path):
+            return {"error": "Archivo no encontrado"}
+        
+        with open(csv_path, 'r', encoding='utf-8-sig') as file:
+            lines = file.readlines()
+        
+        header_found = False
+        analisis = {
+            'lineas_analizadas': [],
+            'formato_detectado': None
+        }
+        
+        for i, line in enumerate(lines[:10]):  # Solo las primeras 10 líneas
+            line_original = line.strip()
+            
+            if 'Codigo' in line_original and 'Nombre' in line_original:
+                header_found = True
+                analisis['linea_encabezados'] = {
+                    'numero': i + 1,
+                    'contenido': line_original,
+                    'partes_tab': line_original.split('\t'),
+                    'partes_comas': line_original.split(',')
+                }
+                continue
+            
+            if header_found and line_original and not line_original.startswith('"Listado') and not line_original.startswith('"Reportes'):
+                # Analizar línea de producto
+                linea_analisis = {
+                    'numero': i + 1,
+                    'contenido_original': line_original,
+                    'partes_tab': line_original.split('\t'),
+                    'partes_comas': line_original.split(','),
+                    'longitud_tab': len(line_original.split('\t')),
+                    'longitud_comas': len(line_original.split(','))
+                }
+                
+                # Limpiar comillas y analizar
+                line_clean = line_original.replace('"', '')
+                linea_analisis['contenido_limpio'] = line_clean
+                linea_analisis['partes_tab_limpias'] = line_clean.split('\t')
+                linea_analisis['partes_comas_limpias'] = line_clean.split(',')
+                
+                analisis['lineas_analizadas'].append(linea_analisis)
+                
+                if len(analisis['lineas_analizadas']) >= 3:
+                    break
+        
+        return analisis
+        
+    except Exception as e:
+        return {"error": str(e)}
+
 def cargar_inventario():
     """Cargar inventario a memoria"""
     global INVENTARIO_MEMORIA

@@ -999,6 +999,13 @@ def debug_inventario():
         except Exception as e:
             result['error_debug'] = str(e)
         
+        # Análisis de formato
+        try:
+            from inventario_simple import analizar_formato_linea
+            result['analisis_formato'] = analizar_formato_linea()
+        except Exception as e:
+            result['error_analisis'] = str(e)
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({
