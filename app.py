@@ -13,13 +13,8 @@ try:
     import psycopg2.extras
     DATABASE_TYPE = 'postgresql'
 except ImportError:
-    try:
-        import psycopg2.binary as psycopg2
-        import psycopg2.extras
-        DATABASE_TYPE = 'postgresql'
-    except ImportError:
-        import sqlite3
-        DATABASE_TYPE = 'sqlite'
+    import sqlite3
+    DATABASE_TYPE = 'sqlite'
 
 # Configuración de farmacias
 FARMACIAS = {
