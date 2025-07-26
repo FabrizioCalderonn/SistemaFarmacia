@@ -361,6 +361,31 @@ def api_medicamentos(laboratorio):
     medicamentos = get_medicamentos_by_laboratorio(laboratorio)
     return jsonify(medicamentos)
 
+@app.route('/api/buscar_simple')
+def api_buscar_simple():
+    """API de búsqueda simplificada para debug"""
+    termino = request.args.get('q', '')
+    print(f"Búsqueda simple solicitada: '{termino}'")
+    
+    if len(termino) < 2:
+        return jsonify([])
+    
+    # Usar directamente la función de búsqueda
+    from inventario_simple import buscar_productos
+    productos = buscar_productos(termino)
+    
+    # Convertir de forma más simple
+    resultado = []
+    for producto in productos:
+        resultado.append([
+            producto.get('laboratorio', ''),
+            producto.get('medicamento', ''),
+            producto.get('presentacion', '')
+        ])
+    
+    print(f"Resultado simple: {resultado}")
+    return jsonify(resultado)
+
 @app.route('/api/buscar')
 def api_buscar():
     """API para buscar productos"""
@@ -376,12 +401,21 @@ def api_buscar():
     
     # Convertir al formato esperado por el frontend: [laboratorio, medicamento, presentacion]
     productos_formateados = []
-    for producto in productos:
-        productos_formateados.append([
-            producto['laboratorio'],
-            producto['medicamento'],
-            producto['presentacion']
-        ])
+    print(f"Procesando {len(productos)} productos...")
+    
+    for i, producto in enumerate(productos):
+        print(f"Producto {i+1}: {producto}")
+        try:
+            productos_formateados.append([
+                producto['laboratorio'],
+                producto['medicamento'],
+                producto['presentacion']
+            ])
+            print(f"Producto {i+1} convertido exitosamente")
+        except Exception as e:
+            print(f"Error convirtiendo producto {i+1}: {e}")
+            print(f"Tipo de producto: {type(producto)}")
+            print(f"Claves disponibles: {producto.keys() if hasattr(producto, 'keys') else 'No es un diccionario'}")
     
     print(f"Productos formateados: {productos_formateados}")
     print(f"Total productos formateados: {len(productos_formateados)}")
