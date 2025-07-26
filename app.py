@@ -365,10 +365,14 @@ def api_medicamentos(laboratorio):
 def api_buscar():
     """API para buscar productos"""
     termino = request.args.get('q', '')
+    print(f"Búsqueda solicitada: '{termino}'")
+    
     if len(termino) < 2:
+        print("Término muy corto, devolviendo lista vacía")
         return jsonify([])
     
     productos = buscar_productos(termino)
+    print(f"Productos encontrados (formato original): {productos}")
     
     # Convertir al formato esperado por el frontend: [laboratorio, medicamento, presentacion]
     productos_formateados = []
@@ -379,6 +383,7 @@ def api_buscar():
             producto['presentacion']
         ])
     
+    print(f"Productos formateados: {productos_formateados}")
     return jsonify(productos_formateados)
 
 @app.route('/guardar_registro', methods=['POST'])
@@ -968,6 +973,31 @@ def api_farmacia_actual():
         'farmacia': farmacia_actual,
         'info': get_farmacia_info(farmacia_actual)
     })
+
+@app.route('/debug/buscar/<termino>')
+def debug_buscar(termino):
+    """Debug específico para la función de búsqueda"""
+    try:
+        from inventario_simple import buscar_productos
+        
+        result = {
+            'termino_buscado': termino,
+            'productos_encontrados': [],
+            'total_encontrados': 0,
+            'error': None
+        }
+        
+        # Probar búsqueda
+        try:
+            productos = buscar_productos(termino)
+            result['productos_encontrados'] = productos
+            result['total_encontrados'] = len(productos)
+        except Exception as e:
+            result['error'] = str(e)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/debug/busqueda')
 def debug_busqueda():
