@@ -165,27 +165,51 @@ def procesar_excel_web(archivo):
         print(f"Error al procesar Excel: {e}")
         return False, f"Error: {str(e)}"
 
-def get_laboratorios():
-    """Obtener lista de laboratorios únicos desde CSV"""
+def parse_inventory_file():
+    """Parsear el archivo de inventario y extraer productos"""
     try:
         csv_path = 'INVENTARIO PARA TRABAJO.csv'
-        print(f"Buscando archivo CSV en: {os.path.abspath(csv_path)}")
-        
         if not os.path.exists(csv_path):
-            print(f"Archivo CSV no encontrado: {csv_path}")
-            # Listar archivos en el directorio actual
-            files = os.listdir('.')
-            print(f"Archivos disponibles: {files}")
             return []
         
-        print(f"Archivo CSV encontrado, tamaño: {os.path.getsize(csv_path)} bytes")
+        productos = []
+        with open(csv_path, 'r', encoding='utf-8-sig') as file:
+            lines = file.readlines()
+            
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('"Listado') and not line.startswith('"Reportes') and not line.startswith('"Codigo'):
+                    parts = line.split('\t')
+                    if len(parts) >= 4:
+                        # Limpiar y procesar cada parte
+                        codigo = parts[0].strip().strip('"') if len(parts) > 0 else ''
+                        nombre = parts[1].strip().strip('"') if len(parts) > 1 else ''
+                        modelo = parts[2].strip().strip('"') if len(parts) > 2 else ''
+                        marca = parts[3].strip().strip('"') if len(parts) > 3 else ''
+                        
+                        if codigo and nombre:
+                            productos.append({
+                                'codigo': codigo,
+                                'nombre': nombre,
+                                'modelo': modelo,
+                                'marca': marca,
+                                'laboratorio': marca if marca else 'Sin especificar'
+                            })
         
+        return productos
+    except Exception as e:
+        print(f"Error al parsear inventario: {e}")
+        return []
+
+def get_laboratorios():
+    """Obtener lista de laboratorios únicos desde archivo de inventario"""
+    try:
+        productos = parse_inventory_file()
         laboratorios = set()
-        with open(csv_path, 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row.get('laboratorio'):
-                    laboratorios.add(row['laboratorio'])
+        
+        for producto in productos:
+            if producto['laboratorio'] and producto['laboratorio'] != 'Sin especificar':
+                laboratorios.add(producto['laboratorio'])
         
         print(f"Laboratorios encontrados: {len(laboratorios)}")
         return sorted(list(laboratorios))
@@ -196,22 +220,19 @@ def get_laboratorios():
         return []
 
 def get_medicamentos_by_laboratorio(laboratorio):
-    """Obtener medicamentos por laboratorio desde CSV"""
+    """Obtener medicamentos por laboratorio desde archivo de inventario"""
     try:
-        if not os.path.exists('INVENTARIO PARA TRABAJO.csv'):
-            return []
-        
+        productos = parse_inventory_file()
         medicamentos = []
-        with open('INVENTARIO PARA TRABAJO.csv', 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row.get('laboratorio') == laboratorio:
-                    medicamentos.append((
-                        row.get('medicamento', ''),
-                        row.get('presentacion', ''),
-                        float(row.get('precio', 0)),
-                        int(row.get('stock', 0))
-                    ))
+        
+        for producto in productos:
+            if producto['laboratorio'] == laboratorio:
+                medicamentos.append((
+                    producto['nombre'],
+                    producto['modelo'],
+                    0.0,  # precio por defecto
+                    1     # stock por defecto
+                ))
         
         return medicamentos
     except Exception as e:
