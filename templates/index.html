@@ -54,6 +54,10 @@
 
         .farmacia-actual-info {
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .farmacia-badge {
@@ -62,6 +66,23 @@
             border-radius: 20px;
             font-size: 0.8em;
             font-weight: 500;
+        }
+
+        .btn-cambiar-farmacia {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-cambiar-farmacia:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
         }
 
         .stats-container {
@@ -310,6 +331,9 @@
                 <span class="farmacia-badge">
                     📍 {{ farmacia_info.nombre }}
                 </span>
+                <a href="/cambiar_farmacia" class="btn-cambiar-farmacia">
+                    🔄 Cambiar
+                </a>
             </div>
         </div>
 
@@ -425,9 +449,6 @@
 
             </div>
             <div class="nav-buttons">
-                <a href="/cambiar_farmacia" class="nav-btn" style="background: #28a745; color: white; border: 2px solid #28a745;">
-                    🏥 Cambiar Farmacia
-                </a>
                 <a href="/historial" class="nav-btn">📋 Ver Historial</a>
                 <!--<a href="/inventario" class="nav-btn">📦 Ver Inventario</a>-->
                 <a href="/exportar_excel" class="nav-btn">📊 Exportar Excel</a>
