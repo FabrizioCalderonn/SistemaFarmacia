@@ -656,9 +656,17 @@
                 document.getElementById('editCantidad').value = registro.cantidad;
                 document.getElementById('editNumeroFactura').value = registro.numero_factura || '';
                 
-                // Convertir fecha para date
-                const fecha = new Date(registro.fecha);
-                document.getElementById('editFecha').value = fecha.toISOString().split('T')[0];
+                // Convertir fecha para date (corregir problema de zona horaria)
+                let fechaParaInput;
+                if (registro.fecha && registro.fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    // Si ya está en formato YYYY-MM-DD, usarlo directamente
+                    fechaParaInput = registro.fecha;
+                } else {
+                    // Si no, convertir usando la función local
+                    const fecha = new Date(registro.fecha);
+                    fechaParaInput = fecha.toISOString().split('T')[0];
+                }
+                document.getElementById('editFecha').value = fechaParaInput;
                 
                 // Mostrar fecha de ingreso (solo lectura)
                 const fechaIngreso = new Date(registro.fecha_ingreso);
@@ -728,7 +736,8 @@
             tbody.innerHTML = registros.map(registro => {
                 totalGeneral += registro.total;
                 
-                const fechaCompra = new Date(registro.fecha).toLocaleDateString('es-ES');
+                // Corregir el problema de zona horaria para la fecha de compra
+                const fechaCompra = formatearFechaLocal(registro.fecha);
                 const fechaIngreso = new Date(registro.fecha_ingreso).toLocaleString('es-ES');
                                  const tipoClass = 'tipo-venta';
                 
@@ -844,6 +853,24 @@
                 medicamentoSelect.disabled = true;
             }
         });
+
+        // Función para formatear fecha local sin problemas de zona horaria
+        function formatearFechaLocal(fechaString) {
+            if (!fechaString) return '-';
+            
+            // Si la fecha ya está en formato YYYY-MM-DD, formatearla directamente
+            if (fechaString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const [año, mes, dia] = fechaString.split('-');
+                return `${dia}/${mes}/${año}`;
+            }
+            
+            // Si es una fecha con hora, usar el método normal
+            try {
+                return new Date(fechaString).toLocaleDateString('es-ES');
+            } catch (e) {
+                return fechaString;
+            }
+        }
 
         // Cerrar modal al hacer clic fuera de él
         window.onclick = function(event) {
