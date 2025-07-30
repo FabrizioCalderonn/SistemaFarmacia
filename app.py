@@ -26,7 +26,7 @@ FARMACIAS = {
     'farmacia2': {
         'nombre': 'Farmacia El Angel',
         'direccion': '2a. Calle Oriente, Av. Ignacio Gomez, Bo. San Pedro #3, Metapán, Santa Ana',
-        'telefono': '2442-0031'
+        'telefono': '2402-0110'
     }
 }
 
@@ -806,7 +806,7 @@ def exportar_excel():
         header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         
         # Encabezados
-        headers = ['Fecha Ingreso', 'Medicamento', 'Laboratorio', 'Cantidad', 'Fecha Compra', 'Fecha Vencimiento', 'Lote', 'Médico', 'Junta Vigilancia', 'Número Inscripción Clínica', 'Observaciones']
+        headers = ['Fecha Ingreso', 'Medicamento', 'Laboratorio', 'Cantidad', 'Fecha Venta', 'Fecha Vencimiento', 'Lote', 'Médico', 'Junta Vigilancia', 'Número Inscripción Clínica', 'Observaciones']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col, value=header)
             cell.font = header_font
@@ -830,7 +830,7 @@ def exportar_excel():
             ws.cell(row=row, column=2, value=registro[1])  # Medicamento
             ws.cell(row=row, column=3, value=registro[0])  # Laboratorio
             ws.cell(row=row, column=4, value=registro[2])  # Cantidad
-            ws.cell(row=row, column=5, value=registro[3])  # Fecha Compra
+            ws.cell(row=row, column=5, value=registro[3])  # Fecha Venta
             ws.cell(row=row, column=6, value=registro[6] if len(registro) > 6 else '')  # Fecha Vencimiento
             ws.cell(row=row, column=7, value=registro[7] if len(registro) > 7 else '')  # Lote
             ws.cell(row=row, column=8, value=registro[8] if len(registro) > 8 else '')  # Médico

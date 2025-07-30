@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Compras</title>
+    <title>Registro de Ventas</title>
     <style>
         * {
             margin: 0;
@@ -325,7 +325,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 Registro de Compras</h1>
+            <h1>🏥 Registro de Ventas</h1>
            
             <div class="farmacia-actual-info">
                 <span class="farmacia-badge">
@@ -390,7 +390,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="fecha">Fecha de Compra</label>
+                        <label for="fecha">Fecha de Venta</label>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="date" id="fecha" name="fecha" required style="flex: 1;">
                             <button type="button" onclick="establecerFechaActual()" style="padding: 6px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
@@ -467,10 +467,16 @@
     </div>
 
     <script>
-        // Establecer fecha actual por defecto
+        // Establecer fecha actual por defecto (hora local)
         function establecerFechaActual() {
             const ahora = new Date();
-            const fecha = ahora.toISOString().split('T')[0];
+            
+            // Obtener la fecha en hora local del navegador
+            const año = ahora.getFullYear();
+            const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+            const dia = String(ahora.getDate()).padStart(2, '0');
+            const fecha = `${año}-${mes}-${dia}`;
+            
             document.getElementById('fecha').value = fecha;
         }
         
