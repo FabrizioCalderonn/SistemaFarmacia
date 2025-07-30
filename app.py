@@ -268,8 +268,11 @@ def get_medicamentos_by_laboratorio(laboratorio):
     """Obtener medicamentos por laboratorio desde archivo de inventario"""
     try:
         # Usar el módulo simple
-        from inventario_simple import get_medicamentos_by_laboratorio as get_meds
-        return get_meds(laboratorio)
+        from inventario_simple import get_medicamentos_by_laboratorio as get_meds_simple
+        print(f"App.py: Llamando a get_medicamentos_by_laboratorio con '{laboratorio}'")
+        result = get_meds_simple(laboratorio)
+        print(f"App.py: Resultado obtenido: {len(result)} medicamentos")
+        return result
     except Exception as e:
         print(f"Error al obtener medicamentos: {e}")
         return []
@@ -363,6 +366,14 @@ def index():
     # Inicializar base de datos si es necesario
     initialize_database()
     
+    # Verificar que el inventario esté cargado
+    try:
+        from inventario_simple import cargar_inventario
+        cargar_inventario()
+        print("Inventario cargado en la página principal")
+    except Exception as e:
+        print(f"Error al cargar inventario en página principal: {e}")
+    
     laboratorios = get_laboratorios()
     estadisticas = get_estadisticas()
     farmacia_actual = get_farmacia_actual()
@@ -377,6 +388,14 @@ def index():
 @app.route('/api/laboratorios')
 def api_laboratorios():
     """API para obtener lista de laboratorios"""
+    # Verificar que el inventario esté cargado
+    try:
+        from inventario_simple import cargar_inventario
+        cargar_inventario()
+        print("Inventario cargado en API laboratorios")
+    except Exception as e:
+        print(f"Error al cargar inventario en API laboratorios: {e}")
+    
     laboratorios = get_laboratorios()
     print(f"API: Laboratorios disponibles: {laboratorios}")
     return jsonify(laboratorios)
@@ -384,10 +403,38 @@ def api_laboratorios():
 @app.route('/api/medicamentos/<laboratorio>')
 def api_medicamentos(laboratorio):
     """API para obtener medicamentos por laboratorio"""
+    print(f"=== API MEDICAMENTOS ===")
     print(f"API: Buscando medicamentos para laboratorio: '{laboratorio}'")
-    medicamentos = get_medicamentos_by_laboratorio(laboratorio)
-    print(f"API: Encontrados {len(medicamentos)} medicamentos")
-    return jsonify(medicamentos)
+    print(f"API: Tipo de laboratorio: {type(laboratorio)}")
+    print(f"API: Longitud del laboratorio: {len(laboratorio)}")
+    
+    # Verificar que el inventario esté cargado
+    try:
+        from inventario_simple import cargar_inventario
+        cargar_inventario()
+        print("Inventario cargado en API medicamentos")
+    except Exception as e:
+        print(f"Error al cargar inventario en API medicamentos: {e}")
+    
+    # Decodificar la URL si es necesario
+    import urllib.parse
+    laboratorio_decoded = urllib.parse.unquote(laboratorio)
+    print(f"API: Laboratorio decodificado: '{laboratorio_decoded}'")
+    
+    try:
+        medicamentos = get_medicamentos_by_laboratorio(laboratorio_decoded)
+        print(f"API: Encontrados {len(medicamentos)} medicamentos")
+        print(f"API: Tipo de resultado: {type(medicamentos)}")
+        
+        if medicamentos:
+            print(f"API: Primer medicamento: {medicamentos[0]}")
+        
+        return jsonify(medicamentos)
+    except Exception as e:
+        print(f"API: Error en api_medicamentos: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify([])
 
 @app.route('/api/buscar_simple')
 def api_buscar_simple():
