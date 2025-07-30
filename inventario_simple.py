@@ -138,12 +138,21 @@ def get_laboratorios():
     
     for i, producto in enumerate(INVENTARIO_MEMORIA):
         if producto['laboratorio'] and producto['laboratorio'] != 'Sin especificar':
-            laboratorios.add(producto['laboratorio'])
+            # Normalizar el nombre del laboratorio
+            lab_normalizado = producto['laboratorio'].strip()
+            laboratorios.add(lab_normalizado)
             if i < 5:  # Mostrar los primeros 5 para debug
-                print(f"Producto {i+1}: {producto['nombre'][:30]}... -> Laboratorio: {producto['laboratorio']}")
+                print(f"Producto {i+1}: {producto['nombre'][:30]}... -> Laboratorio: '{producto['laboratorio']}'")
     
-    print(f"Laboratorios encontrados: {sorted(list(laboratorios))}")
-    return sorted(list(laboratorios))
+    laboratorios_lista = sorted(list(laboratorios))
+    print(f"Laboratorios encontrados: {laboratorios_lista}")
+    
+    # Debug: mostrar laboratorios que contengan "med" o "pharma"
+    laboratorios_med_pharma = [lab for lab in laboratorios_lista if 'med' in lab.lower() or 'pharma' in lab.lower()]
+    if laboratorios_med_pharma:
+        print(f"Laboratorios con 'med' o 'pharma': {laboratorios_med_pharma}")
+    
+    return laboratorios_lista
 
 def get_medicamentos_by_laboratorio(laboratorio):
     """Obtener medicamentos por laboratorio"""
@@ -154,8 +163,15 @@ def get_medicamentos_by_laboratorio(laboratorio):
     print(f"Buscando medicamentos para laboratorio: '{laboratorio}'")
     print(f"Total productos en memoria: {len(INVENTARIO_MEMORIA)}")
     
+    # Normalizar el laboratorio buscado
+    laboratorio_buscar = laboratorio.lower().strip()
+    
     for i, producto in enumerate(INVENTARIO_MEMORIA):
-        if producto['laboratorio'] == laboratorio:
+        # Normalizar el laboratorio del producto
+        laboratorio_producto = producto['laboratorio'].lower().strip()
+        
+        # Comparación más flexible
+        if laboratorio_producto == laboratorio_buscar or laboratorio_producto.startswith(laboratorio_buscar):
             medicamentos.append((
                 producto['nombre'],
                 producto['modelo'],
@@ -163,9 +179,22 @@ def get_medicamentos_by_laboratorio(laboratorio):
                 producto['stock']
             ))
             if len(medicamentos) <= 3:  # Debug: mostrar los primeros
-                print(f"Medicamento encontrado: {producto['nombre'][:30]}...")
+                print(f"Medicamento encontrado: {producto['nombre'][:30]}... -> Lab: {producto['laboratorio']}")
     
     print(f"Total medicamentos encontrados para '{laboratorio}': {len(medicamentos)}")
+    
+    # Si no se encontraron medicamentos, mostrar algunos laboratorios disponibles para debug
+    if len(medicamentos) == 0:
+        print("No se encontraron medicamentos. Laboratorios disponibles:")
+        laboratorios_disponibles = set()
+        for producto in INVENTARIO_MEMORIA:
+            if producto['laboratorio']:
+                laboratorios_disponibles.add(producto['laboratorio'])
+        
+        for lab in sorted(laboratorios_disponibles):
+            if 'med' in lab.lower() or 'pharma' in lab.lower():
+                print(f"  - '{lab}' (similar a '{laboratorio}')")
+    
     return medicamentos
 
 def buscar_productos(termino):

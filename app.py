@@ -378,12 +378,15 @@ def index():
 def api_laboratorios():
     """API para obtener lista de laboratorios"""
     laboratorios = get_laboratorios()
+    print(f"API: Laboratorios disponibles: {laboratorios}")
     return jsonify(laboratorios)
 
 @app.route('/api/medicamentos/<laboratorio>')
 def api_medicamentos(laboratorio):
     """API para obtener medicamentos por laboratorio"""
+    print(f"API: Buscando medicamentos para laboratorio: '{laboratorio}'")
     medicamentos = get_medicamentos_by_laboratorio(laboratorio)
+    print(f"API: Encontrados {len(medicamentos)} medicamentos")
     return jsonify(medicamentos)
 
 @app.route('/api/buscar_simple')
@@ -1211,6 +1214,39 @@ def debug_csv():
                 result['error_lectura'] = str(e)
         
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/debug/med_pharma')
+def debug_med_pharma():
+    """Debug específico para med pharma"""
+    try:
+        from inventario_simple import debug_inventario, cargar_inventario
+        
+        # Cargar inventario
+        cargar_inventario()
+        
+        # Obtener información de debug
+        debug_info = debug_inventario()
+        
+        # Buscar específicamente productos de "med pharma"
+        med_pharma_productos = []
+        from inventario_simple import INVENTARIO_MEMORIA
+        
+        for producto in INVENTARIO_MEMORIA:
+            if 'med pharma' in producto['laboratorio'].lower():
+                med_pharma_productos.append({
+                    'nombre': producto['nombre'],
+                    'laboratorio': producto['laboratorio'],
+                    'modelo': producto['modelo']
+                })
+        
+        return jsonify({
+            'debug_info': debug_info,
+            'med_pharma_productos': med_pharma_productos,
+            'total_med_pharma': len(med_pharma_productos)
+        })
+        
     except Exception as e:
         return jsonify({'error': str(e)})
 
