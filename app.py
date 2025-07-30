@@ -595,34 +595,18 @@ def actualizar_registro(registro_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Obtener el registro original para restaurar el stock
+        # Verificar que el registro existe
         if DATABASE_TYPE == 'postgresql':
-            cursor.execute('SELECT cantidad, laboratorio, medicamento FROM registros WHERE id = %s', (registro_id,))
+            cursor.execute('SELECT id FROM registros WHERE id = %s', (registro_id,))
         else:
-            cursor.execute('SELECT cantidad, laboratorio, medicamento FROM registros WHERE id = ?', (registro_id,))
-        registro_original = cursor.fetchone()
+            cursor.execute('SELECT id FROM registros WHERE id = ?', (registro_id,))
+        registro_existe = cursor.fetchone()
         
-        if not registro_original:
+        if not registro_existe:
             conn.close()
             return jsonify({'success': False, 'message': 'Registro no encontrado'})
         
-        cantidad_original, laboratorio_original, medicamento_original = registro_original
-        
-        # Restaurar stock original
-        if DATABASE_TYPE == 'postgresql':
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock + %s 
-                WHERE laboratorio = %s AND medicamento = %s
-            ''', (cantidad_original, laboratorio_original, medicamento_original))
-        else:
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock + ? 
-                WHERE laboratorio = ? AND medicamento = ?
-            ''', (cantidad_original, laboratorio_original, medicamento_original))
-        
-        # Actualizar el registro
+        # Actualizar el registro (sin modificar inventario - se maneja desde CSV)
         if DATABASE_TYPE == 'postgresql':
             cursor.execute('''
                 UPDATE registros 
@@ -662,20 +646,6 @@ def actualizar_registro(registro_id):
                 registro_id
             ))
         
-        # Actualizar stock con la nueva cantidad
-        if DATABASE_TYPE == 'postgresql':
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock - %s 
-                WHERE laboratorio = %s AND medicamento = %s
-            ''', (data['cantidad'], data['laboratorio'], data['medicamento']))
-        else:
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock - ? 
-                WHERE laboratorio = ? AND medicamento = ?
-            ''', (data['cantidad'], data['laboratorio'], data['medicamento']))
-        
         conn.commit()
         conn.close()
         
@@ -694,34 +664,18 @@ def eliminar_registro(registro_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Obtener información del registro antes de eliminarlo
+        # Verificar que el registro existe
         if DATABASE_TYPE == 'postgresql':
-            cursor.execute('SELECT cantidad, laboratorio, medicamento FROM registros WHERE id = %s', (registro_id,))
+            cursor.execute('SELECT id FROM registros WHERE id = %s', (registro_id,))
         else:
-            cursor.execute('SELECT cantidad, laboratorio, medicamento FROM registros WHERE id = ?', (registro_id,))
+            cursor.execute('SELECT id FROM registros WHERE id = ?', (registro_id,))
         registro = cursor.fetchone()
         
         if not registro:
             conn.close()
             return jsonify({'success': False, 'message': 'Registro no encontrado'})
         
-        cantidad, laboratorio, medicamento = registro
-        
-        # Restaurar stock al inventario
-        if DATABASE_TYPE == 'postgresql':
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock + %s 
-                WHERE laboratorio = %s AND medicamento = %s
-            ''', (cantidad, laboratorio, medicamento))
-        else:
-            cursor.execute('''
-                UPDATE inventario 
-                SET stock = stock + ? 
-                WHERE laboratorio = ? AND medicamento = ?
-            ''', (cantidad, laboratorio, medicamento))
-        
-        # Eliminar el registro
+        # Eliminar el registro (sin modificar inventario - se maneja desde CSV)
         if DATABASE_TYPE == 'postgresql':
             cursor.execute('DELETE FROM registros WHERE id = %s', (registro_id,))
         else:
