@@ -406,6 +406,7 @@
                             <th>Medicamento</th>
                             <th>Laboratorio</th>
                             <th>Cantidad</th>
+                            <th>N° Factura</th>
                             <th>Fecha Compra</th>
                             <th>Vencimiento</th>
                             <th>Lote</th>
@@ -467,6 +468,11 @@
                 <div class="form-group">
                     <label for="editCantidad">Cantidad</label>
                     <input type="number" id="editCantidad" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editNumeroFactura">Número de Factura</label>
+                    <input type="text" id="editNumeroFactura">
                 </div>
                 
                 <div class="form-group">
@@ -648,6 +654,7 @@
                     });
                 
                 document.getElementById('editCantidad').value = registro.cantidad;
+                document.getElementById('editNumeroFactura').value = registro.numero_factura || '';
                 
                 // Convertir fecha para date
                 const fecha = new Date(registro.fecha);
@@ -708,7 +715,7 @@
             if (registros.length === 0) {
                                  tbody.innerHTML = `
                      <tr>
-                         <td colspan="13" class="loading">
+                         <td colspan="14" class="loading">
                              <p>No se encontraron registros con los filtros aplicados</p>
                          </td>
                      </tr>
@@ -731,6 +738,7 @@
                          <td>${registro.medicamento}</td>
                          <td>${registro.laboratorio}</td>
                          <td>${registro.cantidad}</td>
+                         <td>${registro.numero_factura || '-'}</td>
                          <td>${fechaCompra}</td>
                          <td>${registro.fecha_vencimiento || '-'}</td>
                          <td>${registro.lote || '-'}</td>
@@ -755,6 +763,7 @@
                 laboratorio: document.getElementById('editLaboratorio').value,
                 medicamento: document.getElementById('editMedicamento').value,
                 cantidad: parseInt(document.getElementById('editCantidad').value),
+                numero_factura: document.getElementById('editNumeroFactura').value,
                 fecha: document.getElementById('editFecha').value,
                 fecha_vencimiento: document.getElementById('editFechaVencimiento').value,
                 lote: document.getElementById('editLote').value,

@@ -385,6 +385,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="numero_factura">Número de Factura</label>
+                        <input type="text" id="numero_factura" name="numero_factura" placeholder="Número de factura">
+                    </div>
+
+                    <div class="form-group">
                         <label for="fecha">Fecha de Compra</label>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="date" id="fecha" name="fecha" required style="flex: 1;">
@@ -597,6 +602,7 @@
                 laboratorio: document.getElementById('laboratorio').value,
                 medicamento: document.getElementById('medicamento').value,
                 cantidad: parseInt(document.getElementById('cantidad').value),
+                numero_factura: document.getElementById('numero_factura').value,
                 fecha: document.getElementById('fecha').value,
                 fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
                 lote: document.getElementById('lote').value,
