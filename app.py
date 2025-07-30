@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, session
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import tempfile
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, Alignment, PatternFill
@@ -32,6 +32,12 @@ FARMACIAS = {
 
 # Farmacia por defecto
 FARMACIA_DEFAULT = 'farmacia1'
+
+def get_local_datetime():
+    """Obtener la fecha y hora local en formato ISO"""
+    # Obtener la hora local (UTC-6 para El Salvador)
+    local_tz = timezone(timedelta(hours=-6))
+    return datetime.now(local_tz).isoformat()
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui_12345'  # Necesario para las sesiones
@@ -473,7 +479,7 @@ def guardar_registro():
                 data['medicamento'],
                 data['cantidad'],
                 data['fecha'],
-                datetime.now().isoformat(),
+                get_local_datetime(),
                 data.get('observaciones', ''),
                 data.get('tipo_movimiento', 'VENTA'),
                 data.get('fecha_vencimiento', ''),
@@ -496,7 +502,7 @@ def guardar_registro():
                 data['medicamento'],
                 data['cantidad'],
                 data['fecha'],
-                datetime.now().isoformat(),
+                get_local_datetime(),
                 data.get('observaciones', ''),
                 data.get('tipo_movimiento', 'VENTA'),
                 data.get('fecha_vencimiento', ''),
