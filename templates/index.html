@@ -168,6 +168,16 @@
             box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
         }
 
+        .form-group label[for="codigo_empleado"] {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .form-group label[for="codigo_empleado"]::after {
+            content: " *";
+            color: #dc3545;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -363,6 +373,11 @@
                 
                 <form id="registroForm">
                     <div class="form-group">
+                        <label for="codigo_empleado">Código de Empleado *</label>
+                        <input type="text" id="codigo_empleado" name="codigo_empleado" placeholder="Código del empleado que registra la venta" required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="laboratorio">Laboratorio</label>
                         <select id="laboratorio" name="laboratorio" required>
                             <option value="">Seleccione un laboratorio</option>
@@ -431,11 +446,6 @@
                     <textarea id="observaciones" name="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label for="codigo_empleado">Código de Empleado</label>
-                    <input type="text" id="codigo_empleado" name="codigo_empleado" placeholder="Código del empleado que registra la venta">
-                </div>
-
                                     <button type="submit" class="btn">
                     💾 Guardar
                 </button>
@@ -487,6 +497,11 @@
         
         // Establecer fecha al cargar la página
         establecerFechaActual();
+        
+        // Enfocar el campo de código de empleado al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('codigo_empleado').focus();
+        });
 
         // Cargar medicamentos cuando se selecciona laboratorio
         document.getElementById('laboratorio').addEventListener('change', function() {
@@ -626,6 +641,12 @@
             };
 
             // Validaciones
+            if (!formData.codigo_empleado || formData.codigo_empleado.trim() === '') {
+                showAlert('Por favor ingrese el código de empleado', 'error');
+                document.getElementById('codigo_empleado').focus();
+                return;
+            }
+
             if (!formData.laboratorio || !formData.medicamento) {
                 showAlert('Por favor complete todos los campos obligatorios', 'error');
                 return;
@@ -659,6 +680,8 @@
                     establecerFechaActual(); // Establecer fecha actual después de reset
                     document.getElementById('medicamento').disabled = true;
                     document.getElementById('medicamento').innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
+                    // Enfocar el campo de código de empleado después de guardar
+                    document.getElementById('codigo_empleado').focus();
                 } else {
                     showAlert(data.message, 'error');
                 }
