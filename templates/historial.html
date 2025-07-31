@@ -392,7 +392,7 @@
             </div>
             <div class="stat-item">
                 <div class="stat-number" id="totalProductos">0</div>
-                <div class="stat-label">Productos Comprados</div>
+                <div class="stat-label">Productos Vendidos</div>
             </div>
             
         </div>
@@ -407,19 +407,20 @@
                             <th>Laboratorio</th>
                             <th>Cantidad</th>
                             <th>N° Factura</th>
-                            <th>Fecha Compra</th>
+                            <th>Fecha Venta</th>
                             <th>Vencimiento</th>
                             <th>Lote</th>
                             <th>Médico</th>
                             <th>Junta Vig.</th>
                             <th>Inscripción Clínica</th>
+                            <th>Empleado</th>
                             <th>Observaciones</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="registrosTable">
                         <tr>
-                            <td colspan="11" class="loading">
+                            <td colspan="15" class="loading">
                                 <div class="spinner"></div>
                                 <p>Cargando registros...</p>
                             </td>
@@ -510,6 +511,11 @@
                     <input type="text" id="editNumeroInscripcionClinica">
                 </div>
                 
+                <div class="form-group">
+                    <label for="editCodigoEmpleado">Código de Empleado</label>
+                    <input type="text" id="editCodigoEmpleado">
+                </div>
+                
                 <div class="form-group form-group-full">
                     <label for="editObservaciones">Observaciones</label>
                     <textarea id="editObservaciones" rows="3"></textarea>
@@ -538,7 +544,7 @@
             // Mostrar loading
             document.getElementById('registrosTable').innerHTML = `
                 <tr>
-                    <td colspan="13" class="loading">
+                    <td colspan="15" class="loading">
                         <div class="spinner"></div>
                         <p>Cargando registros...</p>
                     </td>
@@ -566,7 +572,7 @@
                     console.error('Error:', error);
                     document.getElementById('registrosTable').innerHTML = `
                                             <tr>
-                        <td colspan="13" class="loading">
+                        <td colspan="15" class="loading">
                             <p>Error al cargar los registros: ${error.message}</p>
                         </td>
                     </tr>
@@ -677,6 +683,7 @@
                 document.getElementById('editMedico').value = registro.medico || '';
                 document.getElementById('editJuntaVigilancia').value = registro.junta_vigilancia || '';
                 document.getElementById('editNumeroInscripcionClinica').value = registro.numero_inscripcion_clinica || '';
+                document.getElementById('editCodigoEmpleado').value = registro.codigo_empleado || '';
                 document.getElementById('editObservaciones').value = registro.observaciones || '';
             }, 100);
         }
@@ -723,7 +730,7 @@
             if (registros.length === 0) {
                                  tbody.innerHTML = `
                      <tr>
-                         <td colspan="14" class="loading">
+                         <td colspan="15" class="loading">
                              <p>No se encontraron registros con los filtros aplicados</p>
                          </td>
                      </tr>
@@ -754,6 +761,7 @@
                          <td>${registro.medico || '-'}</td>
                          <td>${registro.junta_vigilancia || '-'}</td>
                          <td>${registro.numero_inscripcion_clinica || '-'}</td>
+                         <td>${registro.codigo_empleado || '-'}</td>
                          <td>${registro.observaciones || '-'}</td>
                          <td>
                              <button class="btn-delete" onclick="eliminarRegistro(${registro.id})">🗑️ Eliminar</button>
@@ -779,6 +787,7 @@
                 medico: document.getElementById('editMedico').value,
                 junta_vigilancia: document.getElementById('editJuntaVigilancia').value,
                 numero_inscripcion_clinica: document.getElementById('editNumeroInscripcionClinica').value,
+                codigo_empleado: document.getElementById('editCodigoEmpleado').value,
                 observaciones: document.getElementById('editObservaciones').value
             };
 

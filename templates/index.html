@@ -431,6 +431,11 @@
                     <textarea id="observaciones" name="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="codigo_empleado">Código de Empleado</label>
+                    <input type="text" id="codigo_empleado" name="codigo_empleado" placeholder="Código del empleado que registra la venta">
+                </div>
+
                                     <button type="submit" class="btn">
                     💾 Guardar
                 </button>
@@ -616,6 +621,7 @@
                 junta_vigilancia: document.getElementById('junta_vigilancia').value,
             numero_inscripcion_clinica: document.getElementById('numero_inscripcion_clinica').value,
                 observaciones: document.getElementById('observaciones').value,
+                codigo_empleado: document.getElementById('codigo_empleado').value,
                 tipo_movimiento: 'VENTA'
             };
 

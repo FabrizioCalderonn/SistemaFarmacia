@@ -94,6 +94,7 @@ def init_db():
                 junta_vigilancia TEXT,
                 numero_inscripcion_clinica TEXT,
                 numero_factura TEXT,
+                codigo_empleado TEXT,
                 farmacia TEXT DEFAULT 'farmacia1'
             )
         ''')
@@ -101,6 +102,12 @@ def init_db():
         # Agregar columna numero_factura si no existe (para tablas existentes)
         try:
             cursor.execute('ALTER TABLE registros ADD COLUMN numero_factura TEXT')
+        except:
+            pass  # La columna ya existe
+        
+        # Agregar columna codigo_empleado si no existe (para tablas existentes)
+        try:
+            cursor.execute('ALTER TABLE registros ADD COLUMN codigo_empleado TEXT')
         except:
             pass  # La columna ya existe
     else:
@@ -122,6 +129,7 @@ def init_db():
                 junta_vigilancia TEXT,
                 numero_inscripcion_clinica TEXT,
                 numero_factura TEXT,
+                codigo_empleado TEXT,
                 farmacia TEXT DEFAULT 'farmacia1'
             )
         ''')
@@ -129,6 +137,12 @@ def init_db():
         # Agregar columna numero_factura si no existe (para tablas existentes)
         try:
             cursor.execute('ALTER TABLE registros ADD COLUMN numero_factura TEXT')
+        except:
+            pass  # La columna ya existe
+        
+        # Agregar columna codigo_empleado si no existe (para tablas existentes)
+        try:
+            cursor.execute('ALTER TABLE registros ADD COLUMN codigo_empleado TEXT')
         except:
             pass  # La columna ya existe
     
@@ -522,8 +536,8 @@ def guardar_registro():
         if DATABASE_TYPE == 'postgresql':
             cursor.execute('''
                 INSERT INTO registros (laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones, tipo_movimiento, 
-                                     fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, farmacia)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                     fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, codigo_empleado, farmacia)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 data['laboratorio'],
                 data['medicamento'],
@@ -538,6 +552,7 @@ def guardar_registro():
                 data.get('junta_vigilancia', ''),
                 data.get('numero_inscripcion_clinica', ''),
                 data.get('numero_factura', ''),
+                data.get('codigo_empleado', ''),
                 farmacia_actual
             ))
             
@@ -545,8 +560,8 @@ def guardar_registro():
         else:
             cursor.execute('''
                 INSERT INTO registros (laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones, tipo_movimiento, 
-                                 fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, farmacia)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                 fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, codigo_empleado, farmacia)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 data['laboratorio'],
                 data['medicamento'],
@@ -561,6 +576,7 @@ def guardar_registro():
                 data.get('junta_vigilancia', ''),
                 data.get('numero_inscripcion_clinica', ''),
                 data.get('numero_factura', ''),
+                data.get('codigo_empleado', ''),
                 farmacia_actual
             ))
             
@@ -601,7 +617,7 @@ def api_registros():
         # Construir consulta con filtros
         query = '''
             SELECT id, laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
-                   fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura
+                   fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, codigo_empleado
             FROM registros 
             WHERE farmacia = %s
         '''
@@ -645,7 +661,8 @@ def api_registros():
                 'medico': reg[9] if len(reg) > 9 else '',
                 'junta_vigilancia': reg[10] if len(reg) > 10 else '',
                 'numero_inscripcion_clinica': reg[11] if len(reg) > 11 else '',
-                'numero_factura': reg[12] if len(reg) > 12 else ''
+                'numero_factura': reg[12] if len(reg) > 12 else '',
+                'codigo_empleado': reg[13] if len(reg) > 13 else ''
             })
         
         return jsonify(registros_formateados)
@@ -684,7 +701,7 @@ def actualizar_registro(registro_id):
             cursor.execute('''
                 UPDATE registros 
                 SET laboratorio = %s, medicamento = %s, cantidad = %s, fecha = %s, 
-                    observaciones = %s, fecha_vencimiento = %s, lote = %s, medico = %s, junta_vigilancia = %s, numero_inscripcion_clinica = %s, numero_factura = %s
+                    observaciones = %s, fecha_vencimiento = %s, lote = %s, medico = %s, junta_vigilancia = %s, numero_inscripcion_clinica = %s, numero_factura = %s, codigo_empleado = %s
                 WHERE id = %s
             ''', (
                 data['laboratorio'],
@@ -698,13 +715,14 @@ def actualizar_registro(registro_id):
                 data.get('junta_vigilancia', ''),
                 data.get('numero_inscripcion_clinica', ''),
                 data.get('numero_factura', ''),
+                data.get('codigo_empleado', ''),
                 registro_id
             ))
         else:
             cursor.execute('''
                 UPDATE registros 
                 SET laboratorio = ?, medicamento = ?, cantidad = ?, fecha = ?, 
-                    observaciones = ?, fecha_vencimiento = ?, lote = ?, medico = ?, junta_vigilancia = ?, numero_inscripcion_clinica = ?, numero_factura = ?
+                    observaciones = ?, fecha_vencimiento = ?, lote = ?, medico = ?, junta_vigilancia = ?, numero_inscripcion_clinica = ?, numero_factura = ?, codigo_empleado = ?
                 WHERE id = ?
             ''', (
                 data['laboratorio'],
@@ -718,6 +736,7 @@ def actualizar_registro(registro_id):
                 data.get('junta_vigilancia', ''),
                 data.get('numero_inscripcion_clinica', ''),
                 data.get('numero_factura', ''),
+                data.get('codigo_empleado', ''),
                 registro_id
             ))
         
@@ -806,7 +825,7 @@ def exportar_excel():
         header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         
         # Encabezados
-        headers = ['Fecha Ingreso', 'Medicamento', 'Laboratorio', 'Cantidad', 'Fecha Venta', 'Fecha Vencimiento', 'Lote', 'Médico', 'Junta Vigilancia', 'Número Inscripción Clínica', 'Observaciones']
+        headers = ['Fecha Ingreso', 'Medicamento', 'Laboratorio', 'Cantidad', 'Fecha Venta', 'Fecha Vencimiento', 'Lote', 'Médico', 'Junta Vigilancia', 'Número Inscripción Clínica', 'Código Empleado', 'Observaciones']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col, value=header)
             cell.font = header_font
@@ -836,7 +855,8 @@ def exportar_excel():
             ws.cell(row=row, column=8, value=registro[8] if len(registro) > 8 else '')  # Médico
             ws.cell(row=row, column=9, value=registro[9] if len(registro) > 9 else '')  # Junta Vigilancia
             ws.cell(row=row, column=10, value=registro[10] if len(registro) > 10 else '')  # Número Inscripción Clínica
-            ws.cell(row=row, column=11, value=registro[5])  # Observaciones
+            ws.cell(row=row, column=11, value=registro[11] if len(registro) > 11 else '')  # Código Empleado
+            ws.cell(row=row, column=12, value=registro[5])  # Observaciones
 
         
         # Ajustar ancho de columnas
