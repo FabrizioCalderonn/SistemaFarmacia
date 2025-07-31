@@ -115,16 +115,19 @@
 
         .content-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 300px;
             gap: 20px;
             padding: 20px;
             flex: 1;
             overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            margin-top: 20px;
         }
 
         .form-container {
-            background: #f8f9fa;
-            padding: 20px;
+            background: transparent;
+            padding: 0;
             border-radius: 10px;
             overflow-y: auto;
         }
@@ -148,25 +151,7 @@
             font-size: 0.85em;
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: white;
-        }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-        }
 
         .form-group label[for="codigo_empleado"] {
             color: #dc3545;
@@ -178,34 +163,144 @@
             color: #dc3545;
         }
 
+        /* Estilos para las secciones del formulario */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4facfe;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Mejorar el contenedor de fecha */
+        .date-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-input-container input {
+            flex: 1;
+        }
+
+        .btn-today {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-today:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Mejorar el botón principal */
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        /* Mejorar los inputs y selects */
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            background: white;
+        }
+
+        /* Mejorar los labels */
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 768px) {
+            .form-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h3 {
+                font-size: 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .date-input-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-today {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
 
-        .btn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 15px;
-        }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
 
         .nav-buttons {
             display: flex;
@@ -372,83 +467,124 @@
                 <div id="alert" class="alert"></div>
                 
                 <form id="registroForm">
-                    <div class="form-group">
-                        <label for="codigo_empleado">Código de Empleado *</label>
-                        <input type="text" id="codigo_empleado" name="codigo_empleado" placeholder="Código del empleado que registra la venta" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="laboratorio">Laboratorio</label>
-                        <select id="laboratorio" name="laboratorio" required>
-                            <option value="">Seleccione un laboratorio</option>
-                            {% for lab in laboratorios %}
-                            <option value="{{ lab }}">{{ lab }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="medicamento">Medicamento</label>
-                        <select id="medicamento" name="medicamento" required disabled>
-                            <option value="">Primero seleccione un laboratorio</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" id="cantidad" name="cantidad" min="1" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="numero_factura">Número de Factura</label>
-                        <input type="text" id="numero_factura" name="numero_factura" placeholder="Número de factura">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fecha">Fecha de Venta</label>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="date" id="fecha" name="fecha" required style="flex: 1;">
-                            <button type="button" onclick="establecerFechaActual()" style="padding: 6px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
-                                📅 Hoy
-                            </button>
+                    <!-- SECCIÓN 1: IDENTIFICACIÓN DEL EMPLEADO -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>👤 Identificación del Empleado</h3>
+                        </div>
+                        <div class="form-group">
+                            <label for="codigo_empleado">Código de Empleado *</label>
+                            <input type="text" id="codigo_empleado" name="codigo_empleado" placeholder="Ingrese su código de empleado" required>
                         </div>
                     </div>
 
-                                    <div class="form-row">
-                    <div class="form-group">
-                        <label for="fecha_vencimiento">Fecha de Vencimiento</label>
-                        <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
+                    <!-- SECCIÓN 2: PRODUCTO Y CANTIDAD -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>💊 Producto y Cantidad</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="laboratorio">Laboratorio</label>
+                                <select id="laboratorio" name="laboratorio" required>
+                                    <option value="">Seleccione un laboratorio</option>
+                                    {% for lab in laboratorios %}
+                                    <option value="{{ lab }}">{{ lab }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="medicamento">Medicamento</label>
+                                <select id="medicamento" name="medicamento" required disabled>
+                                    <option value="">Primero seleccione un laboratorio</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cantidad">Cantidad</label>
+                                <input type="number" id="cantidad" name="cantidad" min="1" placeholder="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="numero_factura">Número de Factura</label>
+                                <input type="text" id="numero_factura" name="numero_factura" placeholder="Número de factura">
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="lote">Lote</label>
-                        <input type="text" id="lote" name="lote" placeholder="Número de lote" required>
+
+                    <!-- SECCIÓN 3: FECHAS -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>📅 Fechas</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fecha">Fecha de Venta</label>
+                                <div class="date-input-container">
+                                    <input type="date" id="fecha" name="fecha" required>
+                                    <button type="button" onclick="establecerFechaActual()" class="btn-today">
+                                        📅 Hoy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha_vencimiento">Fecha de Vencimiento</label>
+                                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="medico">Nombre del Médico</label>
-                        <input type="text" id="medico" name="medico" placeholder="Dr. Nombre Apellido" required>
+                    <!-- SECCIÓN 4: INFORMACIÓN DEL PRODUCTO -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>🏷️ Información del Producto</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lote">Número de Lote</label>
+                                <input type="text" id="lote" name="lote" placeholder="Número de lote" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="numero_inscripcion_clinica">Número de Inscripción Clínica</label>
+                                <input type="text" id="numero_inscripcion_clinica" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
+                            </div>
+                        </div>
                     </div>
-                                    <div class="form-group">
-                    <label for="junta_vigilancia">Número de Junta de Vigilancia</label>
-                    <input type="text" id="junta_vigilancia" name="junta_vigilancia" placeholder="Número de junta" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="numero_inscripcion_clinica">Número de Inscripción de la Clínica</label>
-                    <input type="text" id="numero_inscripcion_clinica" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
-                </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
-                </div>
+                    <!-- SECCIÓN 5: INFORMACIÓN MÉDICA -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>👨‍⚕️ Información Médica</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="medico">Nombre del Médico</label>
+                                <input type="text" id="medico" name="medico" placeholder="Dr. Nombre Apellido" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="junta_vigilancia">Número de Junta de Vigilancia</label>
+                                <input type="text" id="junta_vigilancia" name="junta_vigilancia" placeholder="Número de junta" required>
+                            </div>
+                        </div>
+                    </div>
 
-                                    <button type="submit" class="btn">
-                    💾 Guardar
-                </button>
+                    <!-- SECCIÓN 6: OBSERVACIONES -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3>📝 Observaciones</h3>
+                        </div>
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones Adicionales</label>
+                            <textarea id="observaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales sobre la venta..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN DE GUARDAR -->
+                    <div class="form-section">
+                        <button type="submit" class="btn">
+                            💾 Guardar Registro
+                        </button>
+                    </div>
                 </form>
 
                 <div class="loading" id="loading">
