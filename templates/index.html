@@ -168,6 +168,14 @@
             background: white;
         }
 
+        /* Campo de código de empleado más pequeño */
+        .form-group input[name="codigo_empleado"] {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
@@ -580,19 +588,13 @@
                     <!-- SECCIÓN 3: FECHAS -->
                     <div class="form-section">
                         <h3 class="section-title">📅 Fechas</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="fecha">Fecha de Venta</label>
-                                <div class="date-input-group">
-                                    <input type="date" id="fecha" name="fecha" required>
-                                    <button type="button" onclick="establecerFechaActual()" class="btn-today">
-                                        📅 Hoy
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="fecha_vencimiento">Fecha Vencimiento</label>
-                                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
+                        <div class="form-group">
+                            <label for="fecha">Fecha de Venta</label>
+                            <div class="date-input-group">
+                                <input type="date" id="fecha" name="fecha" required>
+                                <button type="button" onclick="establecerFechaActual()" class="btn-today">
+                                    📅 Hoy
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -600,15 +602,13 @@
                     <!-- SECCIÓN 4: INFORMACIÓN DEL PRODUCTO -->
                     <div class="form-section">
                         <h3 class="section-title">🏷️ Información del Producto</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lote">Lote</label>
-                                <input type="text" id="lote" name="lote" placeholder="Número de lote" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="numero_inscripcion_clinica">N° Inscripción Clínica</label>
-                                <input type="text" id="numero_inscripcion_clinica" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
-                            </div>
+                        <div class="form-group">
+                            <label for="lote">Lote</label>
+                            <input type="text" id="lote" name="lote" placeholder="Número de lote" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_vencimiento">Fecha Vencimiento</label>
+                            <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
                         </div>
                     </div>
 
@@ -624,6 +624,10 @@
                                 <label for="junta_vigilancia">N° Junta Vigilancia</label>
                                 <input type="text" id="junta_vigilancia" name="junta_vigilancia" placeholder="Número de junta" required>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="numero_inscripcion_clinica">N° Inscripción Clínica</label>
+                            <input type="text" id="numero_inscripcion_clinica" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
                         </div>
                     </div>
 
