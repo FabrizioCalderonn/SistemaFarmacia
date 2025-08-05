@@ -617,7 +617,7 @@ def api_registros():
         # Construir consulta con filtros
         query = '''
             SELECT id, laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
-                   fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, codigo_empleado
+                   fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica, numero_factura, codigo_empleado, tipo_movimiento
             FROM registros 
             WHERE farmacia = %s
         '''
@@ -662,7 +662,8 @@ def api_registros():
                 'junta_vigilancia': reg[10] if len(reg) > 10 else '',
                 'numero_inscripcion_clinica': reg[11] if len(reg) > 11 else '',
                 'numero_factura': reg[12] if len(reg) > 12 else '',
-                'codigo_empleado': reg[13] if len(reg) > 13 else ''
+                'codigo_empleado': reg[13] if len(reg) > 13 else '',
+                'tipo_movimiento': reg[14] if len(reg) > 14 else 'VENTA'
             })
         
         return jsonify(registros_formateados)
@@ -799,7 +800,8 @@ def exportar_excel():
         if DATABASE_TYPE == 'postgresql':
             cursor.execute('''
                 SELECT laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
-                       fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica
+                       fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica,
+                       numero_factura, codigo_empleado, tipo_movimiento
                 FROM registros 
                 WHERE farmacia = %s
                 ORDER BY fecha_ingreso DESC
@@ -807,7 +809,8 @@ def exportar_excel():
         else:
             cursor.execute('''
                 SELECT laboratorio, medicamento, cantidad, fecha, fecha_ingreso, observaciones,
-                       fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica
+                       fecha_vencimiento, lote, medico, junta_vigilancia, numero_inscripcion_clinica,
+                       numero_factura, codigo_empleado, tipo_movimiento
                 FROM registros 
                 WHERE farmacia = ?
                 ORDER BY fecha_ingreso DESC
@@ -825,7 +828,7 @@ def exportar_excel():
         header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         
         # Encabezados
-        headers = ['Fecha Ingreso', 'Medicamento', 'Laboratorio', 'Cantidad', 'Fecha Venta', 'Fecha Vencimiento', 'Lote', 'Médico', 'Junta Vigilancia', 'Número Inscripción Clínica', 'Código Empleado', 'Observaciones']
+        headers = ['Fecha Ingreso', 'Medicamento', 'Laboratorio', 'Cantidad', 'Fecha', 'Tipo Movimiento', 'N° Factura/Devolución', 'Fecha Vencimiento', 'Lote', 'Médico', 'Junta Vigilancia', 'Número Inscripción Clínica', 'Código Empleado', 'Observaciones']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col, value=header)
             cell.font = header_font
@@ -849,14 +852,16 @@ def exportar_excel():
             ws.cell(row=row, column=2, value=registro[1])  # Medicamento
             ws.cell(row=row, column=3, value=registro[0])  # Laboratorio
             ws.cell(row=row, column=4, value=registro[2])  # Cantidad
-            ws.cell(row=row, column=5, value=registro[3])  # Fecha Venta
-            ws.cell(row=row, column=6, value=registro[6] if len(registro) > 6 else '')  # Fecha Vencimiento
-            ws.cell(row=row, column=7, value=registro[7] if len(registro) > 7 else '')  # Lote
-            ws.cell(row=row, column=8, value=registro[8] if len(registro) > 8 else '')  # Médico
-            ws.cell(row=row, column=9, value=registro[9] if len(registro) > 9 else '')  # Junta Vigilancia
-            ws.cell(row=row, column=10, value=registro[10] if len(registro) > 10 else '')  # Número Inscripción Clínica
-            ws.cell(row=row, column=11, value=registro[11] if len(registro) > 11 else '')  # Código Empleado
-            ws.cell(row=row, column=12, value=registro[5])  # Observaciones
+            ws.cell(row=row, column=5, value=registro[3])  # Fecha
+            ws.cell(row=row, column=6, value=registro[14] if len(registro) > 14 else 'VENTA')  # Tipo Movimiento
+            ws.cell(row=row, column=7, value=registro[12] if len(registro) > 12 else '')  # N° Factura/Devolución
+            ws.cell(row=row, column=8, value=registro[6] if len(registro) > 6 else '')  # Fecha Vencimiento
+            ws.cell(row=row, column=9, value=registro[7] if len(registro) > 7 else '')  # Lote
+            ws.cell(row=row, column=10, value=registro[8] if len(registro) > 8 else '')  # Médico
+            ws.cell(row=row, column=11, value=registro[9] if len(registro) > 9 else '')  # Junta Vigilancia
+            ws.cell(row=row, column=12, value=registro[10] if len(registro) > 10 else '')  # Número Inscripción Clínica
+            ws.cell(row=row, column=13, value=registro[13] if len(registro) > 13 else '')  # Código Empleado
+            ws.cell(row=row, column=14, value=registro[5])  # Observaciones
 
         
         # Ajustar ancho de columnas

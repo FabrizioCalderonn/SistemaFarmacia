@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Ventas</title>
+    <title>Registro de Ventas y Devoluciones</title>
     <style>
         * {
             margin: 0;
@@ -485,6 +485,54 @@
             margin-top: 3px;
         }
 
+        /* Estilos para las pestañas */
+        .tab-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #4facfe;
+            border-bottom-color: #4facfe;
+        }
+
+        .tab-button:hover {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 25px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .content-container {
                 grid-template-columns: 1fr;
@@ -501,13 +549,22 @@
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                border-bottom: 1px solid #e9ecef;
+                border-right: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 Registro de Ventas</h1>
+            <h1>🏥 Registro de Ventas y Devoluciones</h1>
            
             <div class="farmacia-actual-info">
                 <span class="farmacia-badge">
@@ -540,117 +597,219 @@
 
         <div class="content-container">
             <div class="form-container">
-                
-                <div id="alert" class="alert"></div>
-                
-                <form id="registroForm">
-                    <!-- SECCIÓN 1: IDENTIFICACIÓN -->
-                    <div class="form-section">
-                        <h3 class="section-title">👤 Identificación</h3>
-                        <div class="form-group">
-                            <label for="codigo_empleado">Código de Empleado *</label>
-                            <input type="text" id="codigo_empleado" name="codigo_empleado" placeholder="Ingrese su código de empleado" required>
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN 2: PRODUCTO -->
-                    <div class="form-section">
-                        <h3 class="section-title">💊 Producto</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="laboratorio">Laboratorio</label>
-                                <select id="laboratorio" name="laboratorio" required>
-                                    <option value="">Seleccione laboratorio</option>
-                                    {% for lab in laboratorios %}
-                                    <option value="{{ lab }}">{{ lab }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="medicamento">Medicamento</label>
-                                <select id="medicamento" name="medicamento" required disabled>
-                                    <option value="">Primero seleccione laboratorio</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="cantidad">Cantidad</label>
-                                <input type="number" id="cantidad" name="cantidad" min="1" placeholder="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="numero_factura">N° Factura</label>
-                                <input type="text" id="numero_factura" name="numero_factura" placeholder="Número de factura">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN 3: FECHAS -->
-                    <div class="form-section">
-                        <h3 class="section-title">📅 Fechas</h3>
-                        <div class="form-group">
-                            <label for="fecha">Fecha de Venta</label>
-                            <div class="date-input-group">
-                                <input type="date" id="fecha" name="fecha" required>
-                                <button type="button" onclick="establecerFechaActual()" class="btn-today">
-                                    📅 Hoy
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN 4: INFORMACIÓN DEL PRODUCTO -->
-                    <div class="form-section">
-                        <h3 class="section-title">🏷️ Información del Producto</h3>
-                        <div class="form-group">
-                            <label for="lote">Lote</label>
-                            <input type="text" id="lote" name="lote" placeholder="Número de lote" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="fecha_vencimiento">Fecha Vencimiento</label>
-                            <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN 5: INFORMACIÓN MÉDICA -->
-                    <div class="form-section">
-                        <h3 class="section-title">👨‍⚕️ Información Médica</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="medico">Médico</label>
-                                <input type="text" id="medico" name="medico" placeholder="Dr. Nombre Apellido" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="junta_vigilancia">N° Junta Vigilancia</label>
-                                <input type="text" id="junta_vigilancia" name="junta_vigilancia" placeholder="Número de junta" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="numero_inscripcion_clinica">N° Inscripción Clínica</label>
-                            <input type="text" id="numero_inscripcion_clinica" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN 6: OBSERVACIONES -->
-                    <div class="form-section">
-                        <h3 class="section-title">📝 Observaciones</h3>
-                        <div class="form-group">
-                            <label for="observaciones">Notas Adicionales</label>
-                            <textarea id="observaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales sobre la venta..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- BOTÓN DE GUARDAR -->
-                    <div class="form-section">
-                        <button type="submit" class="btn">
-                            💾 Guardar Venta
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="cambiarTab('venta')">
+                            💰 Venta
+                        </button>
+                        <button class="tab-button" onclick="cambiarTab('devolucion')">
+                            ↩️ Devolución
                         </button>
                     </div>
-                </form>
 
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Guardando registro...</p>
+                    <div id="alert" class="alert"></div>
+
+                    <!-- PESTAÑA VENTA -->
+                    <div id="tab-venta" class="tab-content active">
+                        <form id="registroFormVenta">
+                            <!-- SECCIÓN 1: IDENTIFICACIÓN -->
+                            <div class="form-section">
+                                <h3 class="section-title">👤 Identificación</h3>
+                                <div class="form-group">
+                                    <label for="codigo_empleado_venta">Código de Empleado *</label>
+                                    <input type="text" id="codigo_empleado_venta" name="codigo_empleado" placeholder="Ingrese su código de empleado" required>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 2: PRODUCTO -->
+                            <div class="form-section">
+                                <h3 class="section-title">💊 Producto</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="laboratorio_venta">Laboratorio</label>
+                                        <select id="laboratorio_venta" name="laboratorio" required>
+                                            <option value="">Seleccione laboratorio</option>
+                                            {% for lab in laboratorios %}
+                                            <option value="{{ lab }}">{{ lab }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="medicamento_venta">Medicamento</label>
+                                        <select id="medicamento_venta" name="medicamento" required disabled>
+                                            <option value="">Primero seleccione laboratorio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cantidad_venta">Cantidad</label>
+                                        <input type="number" id="cantidad_venta" name="cantidad" min="1" placeholder="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="numero_factura_venta">N° Factura</label>
+                                        <input type="text" id="numero_factura_venta" name="numero_factura" placeholder="Número de factura">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 3: FECHAS -->
+                            <div class="form-section">
+                                <h3 class="section-title">📅 Fechas</h3>
+                                <div class="form-group">
+                                    <label for="fecha_venta">Fecha de Venta</label>
+                                    <div class="date-input-group">
+                                        <input type="date" id="fecha_venta" name="fecha" required>
+                                        <button type="button" onclick="establecerFechaActual('fecha_venta')" class="btn-today">
+                                            📅 Hoy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 4: INFORMACIÓN DEL PRODUCTO -->
+                            <div class="form-section">
+                                <h3 class="section-title">🏷️ Información del Producto</h3>
+                                <div class="form-group">
+                                    <label for="lote_venta">Lote</label>
+                                    <input type="text" id="lote_venta" name="lote" placeholder="Número de lote" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fecha_vencimiento_venta">Fecha Vencimiento</label>
+                                    <input type="date" id="fecha_vencimiento_venta" name="fecha_vencimiento" required>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 5: INFORMACIÓN MÉDICA -->
+                            <div class="form-section">
+                                <h3 class="section-title">👨‍⚕️ Información Médica</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="medico_venta">Médico</label>
+                                        <input type="text" id="medico_venta" name="medico" placeholder="Dr. Nombre Apellido" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="junta_vigilancia_venta">N° Junta Vigilancia</label>
+                                        <input type="text" id="junta_vigilancia_venta" name="junta_vigilancia" placeholder="Número de junta" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="numero_inscripcion_clinica_venta">N° Inscripción Clínica</label>
+                                    <input type="text" id="numero_inscripcion_clinica_venta" name="numero_inscripcion_clinica" placeholder="Número de inscripción">
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 6: OBSERVACIONES -->
+                            <div class="form-section">
+                                <h3 class="section-title">📝 Observaciones</h3>
+                                <div class="form-group">
+                                    <label for="observaciones_venta">Notas Adicionales</label>
+                                    <textarea id="observaciones_venta" name="observaciones" rows="3" placeholder="Observaciones adicionales sobre la venta..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- BOTÓN DE GUARDAR -->
+                            <div class="form-section">
+                                <button type="submit" class="btn">
+                                    💾 Guardar Venta
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- PESTAÑA DEVOLUCIÓN -->
+                    <div id="tab-devolucion" class="tab-content">
+                        <form id="registroFormDevolucion">
+                            <!-- SECCIÓN 1: IDENTIFICACIÓN -->
+                            <div class="form-section">
+                                <h3 class="section-title">👤 Identificación</h3>
+                                <div class="form-group">
+                                    <label for="codigo_empleado_devolucion">Código de Empleado *</label>
+                                    <input type="text" id="codigo_empleado_devolucion" name="codigo_empleado" placeholder="Ingrese su código de empleado" required>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 2: PRODUCTO -->
+                            <div class="form-section">
+                                <h3 class="section-title">💊 Producto</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="laboratorio_devolucion">Laboratorio</label>
+                                        <select id="laboratorio_devolucion" name="laboratorio" required>
+                                            <option value="">Seleccione laboratorio</option>
+                                            {% for lab in laboratorios %}
+                                            <option value="{{ lab }}">{{ lab }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="medicamento_devolucion">Medicamento</label>
+                                        <select id="medicamento_devolucion" name="medicamento" required disabled>
+                                            <option value="">Primero seleccione laboratorio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cantidad_devolucion">Cantidad</label>
+                                        <input type="number" id="cantidad_devolucion" name="cantidad" min="1" placeholder="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="numero_factura_devolucion">N° Devolución</label>
+                                        <input type="text" id="numero_factura_devolucion" name="numero_factura" placeholder="Número de devolución">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 3: FECHAS -->
+                            <div class="form-section">
+                                <h3 class="section-title">📅 Fechas</h3>
+                                <div class="form-group">
+                                    <label for="fecha_devolucion">Fecha de Devolución</label>
+                                    <div class="date-input-group">
+                                        <input type="date" id="fecha_devolucion" name="fecha" required>
+                                        <button type="button" onclick="establecerFechaActual('fecha_devolucion')" class="btn-today">
+                                            📅 Hoy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 4: INFORMACIÓN DEL PRODUCTO -->
+                            <div class="form-section">
+                                <h3 class="section-title">🏷️ Información del Producto</h3>
+                                <div class="form-group">
+                                    <label for="lote_devolucion">Lote</label>
+                                    <input type="text" id="lote_devolucion" name="lote" placeholder="Número de lote" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fecha_vencimiento_devolucion">Fecha Vencimiento</label>
+                                    <input type="date" id="fecha_vencimiento_devolucion" name="fecha_vencimiento" required>
+                                </div>
+                            </div>
+
+                            <!-- SECCIÓN 5: OBSERVACIONES -->
+                            <div class="form-section">
+                                <h3 class="section-title">📝 Observaciones</h3>
+                                <div class="form-group">
+                                    <label for="observaciones_devolucion">Motivo de Devolución</label>
+                                    <textarea id="observaciones_devolucion" name="observaciones" rows="3" placeholder="Motivo de la devolución..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- BOTÓN DE GUARDAR -->
+                            <div class="form-section">
+                                <button type="submit" class="btn">
+                                    💾 Guardar Devolución
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Guardando registro...</p>
+                    </div>
                 </div>
             </div>
 
@@ -679,8 +838,33 @@
     </div>
 
     <script>
+        // Variable global para el tipo de movimiento actual
+        let tipoMovimientoActual = 'VENTA';
+
+        // Función para cambiar entre pestañas
+        function cambiarTab(tipo) {
+            // Actualizar botones
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Actualizar contenido
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tipo}`).classList.add('active');
+            
+            // Actualizar tipo de movimiento
+            tipoMovimientoActual = tipo === 'venta' ? 'VENTA' : 'DEVOLUCION';
+            
+            // Establecer fecha actual en la pestaña activa
+            const fechaId = tipo === 'venta' ? 'fecha_venta' : 'fecha_devolucion';
+            establecerFechaActual(fechaId);
+            
+            // Enfocar el campo de código de empleado correspondiente
+            const codigoId = tipo === 'venta' ? 'codigo_empleado_venta' : 'codigo_empleado_devolucion';
+            document.getElementById(codigoId).focus();
+        }
+
         // Establecer fecha actual por defecto (hora local)
-        function establecerFechaActual() {
+        function establecerFechaActual(fechaId = 'fecha_venta') {
             const ahora = new Date();
             
             // Obtener la fecha en hora local del navegador
@@ -689,21 +873,19 @@
             const dia = String(ahora.getDate()).padStart(2, '0');
             const fecha = `${año}-${mes}-${dia}`;
             
-            document.getElementById('fecha').value = fecha;
+            document.getElementById(fechaId).value = fecha;
         }
         
         // Establecer fecha al cargar la página
-        establecerFechaActual();
-        
-        // Enfocar el campo de código de empleado al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('codigo_empleado').focus();
+            establecerFechaActual('fecha_venta');
+            document.getElementById('codigo_empleado_venta').focus();
         });
 
-        // Cargar medicamentos cuando se selecciona laboratorio
-        document.getElementById('laboratorio').addEventListener('change', function() {
-            const laboratorio = this.value;
-            const medicamentoSelect = document.getElementById('medicamento');
+        // Función para cargar medicamentos
+        function cargarMedicamentos(laboratorioId, medicamentoId) {
+            const laboratorio = document.getElementById(laboratorioId).value;
+            const medicamentoSelect = document.getElementById(medicamentoId);
             
             console.log('Laboratorio seleccionado:', laboratorio);
             
@@ -743,6 +925,16 @@
                 medicamentoSelect.innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
                 medicamentoSelect.disabled = true;
             }
+        }
+
+        // Cargar medicamentos cuando se selecciona laboratorio (Venta)
+        document.getElementById('laboratorio_venta').addEventListener('change', function() {
+            cargarMedicamentos('laboratorio_venta', 'medicamento_venta');
+        });
+
+        // Cargar medicamentos cuando se selecciona laboratorio (Devolución)
+        document.getElementById('laboratorio_devolucion').addEventListener('change', function() {
+            cargarMedicamentos('laboratorio_devolucion', 'medicamento_devolucion');
         });
 
 
@@ -788,15 +980,31 @@
                                 `;
                                 item.addEventListener('click', () => {
                                     console.log('Producto seleccionado:', producto);
-                                    // Llenar automáticamente el formulario
-                                    document.getElementById('laboratorio').value = producto[0];
-                                    document.getElementById('laboratorio').dispatchEvent(new Event('change'));
                                     
-                                    setTimeout(() => {
-                                        document.getElementById('medicamento').value = producto[1];
-                                        document.getElementById('busqueda').value = '';
-                                        document.getElementById('searchResults').style.display = 'none';
-                                    }, 1000);
+                                    // Determinar qué formulario está activo
+                                    const isVentaActive = document.getElementById('tab-venta').classList.contains('active');
+                                    
+                                    if (isVentaActive) {
+                                        // Llenar formulario de venta
+                                        document.getElementById('laboratorio_venta').value = producto[0];
+                                        document.getElementById('laboratorio_venta').dispatchEvent(new Event('change'));
+                                        
+                                        setTimeout(() => {
+                                            document.getElementById('medicamento_venta').value = producto[1];
+                                            document.getElementById('busqueda').value = '';
+                                            document.getElementById('searchResults').style.display = 'none';
+                                        }, 1000);
+                                    } else {
+                                        // Llenar formulario de devolución
+                                        document.getElementById('laboratorio_devolucion').value = producto[0];
+                                        document.getElementById('laboratorio_devolucion').dispatchEvent(new Event('change'));
+                                        
+                                        setTimeout(() => {
+                                            document.getElementById('medicamento_devolucion').value = producto[1];
+                                            document.getElementById('busqueda').value = '';
+                                            document.getElementById('searchResults').style.display = 'none';
+                                        }, 1000);
+                                    }
                                 });
                                 resultsContainer.appendChild(item);
                             });
@@ -817,78 +1025,92 @@
             }
         });
 
-        // Manejar envío del formulario
-        document.getElementById('registroForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Función para manejar el envío de formularios
+        function manejarEnvioFormulario(formId, tipoMovimiento) {
+            const form = document.getElementById(formId);
+            const isVenta = tipoMovimiento === 'VENTA';
             
-            const formData = {
-                laboratorio: document.getElementById('laboratorio').value,
-                medicamento: document.getElementById('medicamento').value,
-                cantidad: parseInt(document.getElementById('cantidad').value),
-                numero_factura: document.getElementById('numero_factura').value,
-                fecha: document.getElementById('fecha').value,
-                fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
-                lote: document.getElementById('lote').value,
-                medico: document.getElementById('medico').value,
-                junta_vigilancia: document.getElementById('junta_vigilancia').value,
-            numero_inscripcion_clinica: document.getElementById('numero_inscripcion_clinica').value,
-                observaciones: document.getElementById('observaciones').value,
-                codigo_empleado: document.getElementById('codigo_empleado').value,
-                tipo_movimiento: 'VENTA'
-            };
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Obtener los IDs de los campos según el tipo
+                const suffix = isVenta ? '_venta' : '_devolucion';
+                
+                const formData = {
+                    laboratorio: document.getElementById(`laboratorio${suffix}`).value,
+                    medicamento: document.getElementById(`medicamento${suffix}`).value,
+                    cantidad: parseInt(document.getElementById(`cantidad${suffix}`).value),
+                    numero_factura: document.getElementById(`numero_factura${suffix}`).value,
+                    fecha: document.getElementById(`fecha${suffix}`).value,
+                    fecha_vencimiento: document.getElementById(`fecha_vencimiento${suffix}`).value,
+                    lote: document.getElementById(`lote${suffix}`).value,
+                    medico: isVenta ? document.getElementById(`medico${suffix}`).value : '',
+                    junta_vigilancia: isVenta ? document.getElementById(`junta_vigilancia${suffix}`).value : '',
+                    numero_inscripcion_clinica: isVenta ? document.getElementById(`numero_inscripcion_clinica${suffix}`).value : '',
+                    observaciones: document.getElementById(`observaciones${suffix}`).value,
+                    codigo_empleado: document.getElementById(`codigo_empleado${suffix}`).value,
+                    tipo_movimiento: tipoMovimiento
+                };
 
-            // Validaciones
-            if (!formData.codigo_empleado || formData.codigo_empleado.trim() === '') {
-                showAlert('Por favor ingrese el código de empleado', 'error');
-                document.getElementById('codigo_empleado').focus();
-                return;
-            }
-
-            if (!formData.laboratorio || !formData.medicamento) {
-                showAlert('Por favor complete todos los campos obligatorios', 'error');
-                return;
-            }
-
-            if (formData.cantidad <= 0) {
-                showAlert('La cantidad debe ser mayor a 0', 'error');
-                return;
-            }
-
-            // Mostrar loading
-            document.getElementById('loading').style.display = 'block';
-            document.querySelector('.btn').disabled = true;
-
-            // Enviar datos
-            fetch('/guardar_registro', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loading').style.display = 'none';
-                document.querySelector('.btn').disabled = false;
-
-                if (data.success) {
-                    showAlert(data.message, 'success');
-                    document.getElementById('registroForm').reset();
-                    establecerFechaActual(); // Establecer fecha actual después de reset
-                    document.getElementById('medicamento').disabled = true;
-                    document.getElementById('medicamento').innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
-                    // Enfocar el campo de código de empleado después de guardar
-                    document.getElementById('codigo_empleado').focus();
-                } else {
-                    showAlert(data.message, 'error');
+                // Validaciones
+                if (!formData.codigo_empleado || formData.codigo_empleado.trim() === '') {
+                    showAlert('Por favor ingrese el código de empleado', 'error');
+                    document.getElementById(`codigo_empleado${suffix}`).focus();
+                    return;
                 }
-            })
-            .catch(error => {
-                document.getElementById('loading').style.display = 'none';
-                document.querySelector('.btn').disabled = false;
-                showAlert('Error al guardar el registro', 'error');
-                console.error('Error:', error);
+
+                if (!formData.laboratorio || !formData.medicamento) {
+                    showAlert('Por favor complete todos los campos obligatorios', 'error');
+                    return;
+                }
+
+                if (formData.cantidad <= 0) {
+                    showAlert('La cantidad debe ser mayor a 0', 'error');
+                    return;
+                }
+
+                // Mostrar loading
+                document.getElementById('loading').style.display = 'block';
+                form.querySelector('.btn').disabled = true;
+
+                // Enviar datos
+                fetch('/guardar_registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    form.querySelector('.btn').disabled = false;
+
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        form.reset();
+                        establecerFechaActual(`fecha${suffix}`);
+                        document.getElementById(`medicamento${suffix}`).disabled = true;
+                        document.getElementById(`medicamento${suffix}`).innerHTML = '<option value="">Primero seleccione un laboratorio</option>';
+                        // Enfocar el campo de código de empleado después de guardar
+                        document.getElementById(`codigo_empleado${suffix}`).focus();
+                    } else {
+                        showAlert(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none';
+                    form.querySelector('.btn').disabled = false;
+                    showAlert('Error al guardar el registro', 'error');
+                    console.error('Error:', error);
+                });
             });
+        }
+
+        // Inicializar manejadores de formularios
+        document.addEventListener('DOMContentLoaded', function() {
+            manejarEnvioFormulario('registroFormVenta', 'VENTA');
+            manejarEnvioFormulario('registroFormDevolucion', 'DEVOLUCION');
         });
 
         function showAlert(message, type) {
