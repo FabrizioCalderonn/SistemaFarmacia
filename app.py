@@ -853,14 +853,14 @@ def exportar_excel():
             ws.cell(row=row, column=3, value=registro[0])  # Laboratorio
             ws.cell(row=row, column=4, value=registro[2])  # Cantidad
             ws.cell(row=row, column=5, value=registro[3])  # Fecha
-            ws.cell(row=row, column=6, value=registro[14] if len(registro) > 14 else 'VENTA')  # Tipo Movimiento
-            ws.cell(row=row, column=7, value=registro[12] if len(registro) > 12 else '')  # N° Factura/Devolución
+            ws.cell(row=row, column=6, value=registro[13] if len(registro) > 13 else 'VENTA')  # Tipo Movimiento
+            ws.cell(row=row, column=7, value=registro[11] if len(registro) > 11 else '')  # N° Factura/Devolución
             ws.cell(row=row, column=8, value=registro[6] if len(registro) > 6 else '')  # Fecha Vencimiento
             ws.cell(row=row, column=9, value=registro[7] if len(registro) > 7 else '')  # Lote
             ws.cell(row=row, column=10, value=registro[8] if len(registro) > 8 else '')  # Médico
             ws.cell(row=row, column=11, value=registro[9] if len(registro) > 9 else '')  # Junta Vigilancia
             ws.cell(row=row, column=12, value=registro[10] if len(registro) > 10 else '')  # Número Inscripción Clínica
-            ws.cell(row=row, column=13, value=registro[13] if len(registro) > 13 else '')  # Código Empleado
+            ws.cell(row=row, column=13, value=registro[12] if len(registro) > 12 else '')  # Código Empleado
             ws.cell(row=row, column=14, value=registro[5])  # Observaciones
 
         
