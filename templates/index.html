@@ -14,15 +14,15 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             padding: 10px;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 1400px;
-            height: calc(100vh - 20px);
+            min-height: calc(100vh - 20px);
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -119,7 +119,7 @@
             gap: 25px;
             padding: 20px;
             flex: 1;
-            overflow: hidden;
+            overflow: visible;
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
@@ -132,6 +132,7 @@
             overflow-y: auto;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             border: 1px solid #e9ecef;
+            max-height: calc(100vh - 200px);
         }
 
         .search-container {
@@ -142,6 +143,8 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             border: 1px solid #e9ecef;
             height: fit-content;
+            position: sticky;
+            top: 20px;
         }
 
         .form-group {
@@ -196,21 +199,49 @@
 
         /* Estilos para las secciones del formulario */
         .form-section {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
             border: 1px solid #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-1px);
+        }
+
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 12px 12px 0 0;
         }
 
         .section-title {
             margin: 0 0 15px 0;
             color: #495057;
-            font-size: 16px;
-            font-weight: 600;
-            border-bottom: 2px solid #4facfe;
+            font-size: 18px;
+            font-weight: 700;
             padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 2px;
         }
 
         /* Mejorar el grupo de fecha con botón */
@@ -301,11 +332,12 @@
         .form-group select,
         .form-group textarea {
             border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
+            border-radius: 10px;
+            padding: 14px 16px;
             font-size: 14px;
             transition: all 0.3s ease;
             background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .form-group input:focus,
@@ -313,8 +345,16 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-            transform: translateY(-1px);
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.15);
+            transform: translateY(-2px);
+            background: #f8f9ff;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
         }
 
         /* Mejorar los labels */
@@ -403,8 +443,12 @@
         .nav-btn:hover {
             background: #4facfe;
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(79, 172, 254, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(79, 172, 254, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(-1px);
         }
 
         /* Mejorar la apariencia de los botones de navegación */
@@ -420,17 +464,34 @@
         .nav-btn {
             flex: 1;
             min-width: 120px;
-            padding: 12px 20px;
+            padding: 14px 22px;
             border: 2px solid #4facfe;
             background: white;
             color: #4facfe;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: center;
             font-weight: 600;
             transition: all 0.3s ease;
             font-size: 13px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
         }
 
         .alert {
@@ -568,7 +629,7 @@
 
         .tab-button {
             flex: 1;
-            padding: 15px 20px;
+            padding: 18px 24px;
             background: transparent;
             border: none;
             cursor: pointer;
@@ -577,17 +638,36 @@
             color: #666;
             transition: all 0.3s ease;
             border-bottom: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .tab-button:hover::before {
+            left: 100%;
         }
 
         .tab-button.active {
             background: white;
             color: #4facfe;
             border-bottom-color: #4facfe;
+            box-shadow: 0 -2px 8px rgba(79, 172, 254, 0.1);
         }
 
         .tab-button:hover {
-            background: rgba(79, 172, 254, 0.1);
+            background: rgba(79, 172, 254, 0.05);
             color: #4facfe;
+            transform: translateY(-1px);
         }
 
         .tab-content {
