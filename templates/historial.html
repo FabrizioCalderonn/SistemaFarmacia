@@ -790,26 +790,149 @@
         }
 
         function eliminarRegistro(id) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.')) {
+            // Mostrar modal de confirmación con contraseña
+            mostrarModalEliminacion(id);
+        }
+
+        function mostrarModalEliminacion(id) {
+            // Crear modal de confirmación
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+
+            const contenido = document.createElement('div');
+            contenido.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            `;
+
+            contenido.innerHTML = `
+                <h2 style="color: #dc3545; margin-bottom: 20px; text-align: center;">🗑️ Eliminar Registro</h2>
+                
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="color: #856404; margin: 0; text-align: center;">
+                        ⚠️ <strong>Esta acción no se puede deshacer</strong><br>
+                        Se eliminará permanentemente el registro seleccionado.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="adminPassword" style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
+                        🔐 Contraseña de Administrador
+                    </label>
+                    <input type="password" id="adminPassword" placeholder="Ingrese la contraseña" 
+                           style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px;">
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="button" onclick="this.closest('.modal').remove()" style="
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        padding: 12px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">❌ Cancelar</button>
+                    <button type="button" onclick="confirmarEliminacion(${id})" style="
+                        background: #dc3545;
+                        color: white;
+                        border: none;
+                        padding: 12px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">🗑️ Eliminar</button>
+                </div>
+
+                <div id="loadingEliminacion" style="display: none; text-align: center; margin-top: 20px;">
+                    <div style="border: 2px solid #f3f3f3; border-top: 2px solid #dc3545; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                    <p style="color: #666;">Eliminando registro...</p>
+                </div>
+            `;
+
+            modal.appendChild(contenido);
+            modal.className = 'modal';
+            document.body.appendChild(modal);
+
+            // Enfocar el campo de contraseña
+            setTimeout(() => {
+                document.getElementById('adminPassword').focus();
+            }, 100);
+
+            // Cerrar modal al hacer clic fuera
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+
+            // Permitir confirmar con Enter
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmarEliminacion(id);
+                }
+            });
+        }
+
+        function confirmarEliminacion(id) {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!password) {
+                alert('Por favor ingrese la contraseña de administrador');
+                document.getElementById('adminPassword').focus();
                 return;
             }
 
+            // Mostrar loading
+            document.getElementById('loadingEliminacion').style.display = 'block';
+            document.querySelector('button[onclick="confirmarEliminacion(' + id + ')"]').disabled = true;
+
+            // Enviar solicitud de eliminación
             fetch(`/api/registros/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ password: password })
             })
             .then(response => response.json())
             .then(data => {
+                // Ocultar loading
+                document.getElementById('loadingEliminacion').style.display = 'none';
+                document.querySelector('button[onclick="confirmarEliminacion(' + id + ')"]').disabled = false;
+
                 if (data.success) {
                     alert('Registro eliminado exitosamente');
+                    // Cerrar modal y recargar registros
+                    document.querySelector('.modal').remove();
                     cargarRegistros();
                 } else {
                     alert('Error al eliminar: ' + data.message);
+                    // Limpiar campo de contraseña y enfocar
+                    document.getElementById('adminPassword').value = '';
+                    document.getElementById('adminPassword').focus();
                 }
             })
             .catch(error => {
+                // Ocultar loading
+                document.getElementById('loadingEliminacion').style.display = 'none';
+                document.querySelector('button[onclick="confirmarEliminacion(' + id + ')"]').disabled = false;
+                
                 console.error('Error:', error);
                 alert('Error al eliminar el registro');
             });

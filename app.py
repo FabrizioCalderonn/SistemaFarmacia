@@ -7,31 +7,26 @@ from openpyxl.styles import Font, Alignment, PatternFill
 import werkzeug
 import csv
 
+# Importar configuración
+from config import Config
+
 # Importar psycopg2 para PostgreSQL o sqlite3 como fallback
 try:
     import psycopg2
     import psycopg2.extras
-    DATABASE_TYPE = 'postgresql'
+    DATABASE_TYPE = Config.DATABASE_TYPE
 except ImportError:
     import sqlite3
     DATABASE_TYPE = 'sqlite'
 
 # Configuración de farmacias
-FARMACIAS = {
-    'farmacia1': {
-        'nombre': 'Farmacia Popular',
-        'direccion': 'Calle 15 de Septiembre Bo. San Pedro No. 3, Metapán, Santa Ana',
-        'telefono': '2442-0202'
-    },
-    'farmacia2': {
-        'nombre': 'Farmacia El Angel',
-        'direccion': '2a. Calle Oriente, Av. Ignacio Gomez, Bo. San Pedro #3, Metapán, Santa Ana',
-        'telefono': '2402-0110'
-    }
-}
+FARMACIAS = Config.FARMACIAS
 
 # Farmacia por defecto
-FARMACIA_DEFAULT = 'farmacia1'
+FARMACIA_DEFAULT = Config.FARMACIA_DEFAULT
+
+# Contraseña de administrador para eliminar registros
+ADMIN_PASSWORD = Config.ADMIN_PASSWORD
 
 def get_local_datetime():
     """Obtener la fecha y hora local en formato ISO"""
@@ -40,17 +35,17 @@ def get_local_datetime():
     return datetime.now(local_tz).isoformat()
 
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta_aqui_12345'  # Necesario para las sesiones
+app.secret_key = Config.SECRET_KEY  # Necesario para las sesiones
 
 # Configuración de la base de datos
 if DATABASE_TYPE == 'postgresql':
     # Configuración para PostgreSQL (Supabase)
-    DATABASE_URL = os.environ.get('DATABASE_URL')
+    DATABASE_URL = Config.DATABASE_URL
     if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
 else:
     # Configuración para SQLite (local)
-    DATABASE = 'farmacia.db'
+    DATABASE = Config.DATABASE
 
 def get_db_connection():
     """Obtener conexión a la base de datos"""
@@ -756,6 +751,15 @@ def actualizar_registro(registro_id):
 def eliminar_registro(registro_id):
     """Eliminar un registro"""
     try:
+        # Verificar contraseña de administrador
+        data = request.get_json()
+        if not data or 'password' not in data:
+            return jsonify({'success': False, 'message': 'Contraseña de administrador requerida'})
+        
+        password = data['password']
+        if password != ADMIN_PASSWORD:
+            return jsonify({'success': False, 'message': 'Contraseña de administrador incorrecta'})
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         

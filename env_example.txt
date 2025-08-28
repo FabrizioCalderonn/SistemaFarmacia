@@ -1,0 +1,20 @@
+# Configuración de Seguridad del Sistema de Farmacia
+# Copie este archivo a .env y configure sus valores
+
+# Contraseña de administrador para eliminar registros
+# CAMBIAR ESTA CONTRASEÑA ANTES DE USAR EN PRODUCCIÓN
+ADMIN_PASSWORD=admin123
+
+# Clave secreta para sesiones Flask
+# Generar una clave aleatoria y segura
+SECRET_KEY=tu_clave_secreta_aqui_12345
+
+# Configuración de base de datos (opcional)
+# Si no se configura, se usará SQLite local
+# DATABASE_URL=postgresql://usuario:contraseña@host:puerto/base_datos
+
+# Configuración de cookies seguras (para HTTPS)
+# SESSION_COOKIE_SECURE=false
+
+# Nivel de logging
+# LOG_LEVEL=INFO
